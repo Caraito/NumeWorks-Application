@@ -1,0 +1,145 @@
+# Outils — application pour NumWorks N0110
+
+Une application « boîte à outils » pour le lycée (niveau première), qui s'installe **à côté** du système officiel de la calculatrice :
+
+| Outil | Ce qu'il fait |
+|---|---|
+| **Équilibrer une équation** | Équilibre une équation chimique (parenthèses, crochets, hydrates, ions, électrons) et affiche la vérification atome par atome. |
+| **Résoudre un triangle** | À partir de 3 valeurs (côtés / angles), calcule tout le reste, la méthode (Al-Kashi, loi des sinus), l'aire, la nature du triangle, et le dessine. Gère le cas ambigu à 2 solutions. Degrés ou radians. |
+| **Binaire** | Conversions de bases avec étapes, addition / soustraction posées avec retenues, complément à 2, nombres à virgule IEEE 754, entraînement noté. |
+| **Chronomètre** | Avec temps intermédiaires (tours). |
+| **Minuteur** | Alerte visuelle (écran qui clignote) à la fin. |
+| **Nombres aléatoires** | Entiers dans un intervalle, tirage sans doublon, dés, pile ou face, mélange de 1 à n. |
+
+![Menu](docs/menu.png) ![Chimie](docs/chimie.png) ![Triangle](docs/triangle.png)
+![Dessin](docs/dessin.png) ![Binaire](docs/binaire.png) ![Complément à 2](docs/complement2.png)
+
+*(Captures prises dans le simulateur officiel NumWorks.)*
+
+---
+
+## Pourquoi une application et pas un « OS custom » ?
+
+Depuis Epsilon 16, NumWorks **verrouille** la N0110 : à la mise à jour, un programme de démarrage est installé qui refuse tout système non officiel. Une calculatrice en **24.10.0 est verrouillée**. La déverrouiller demanderait une manipulation matérielle risquée (Raspberry Pi Pico).
+
+Les **applications externes** (fichiers `.nwa`), elles, sont prévues par NumWorks : on les installe depuis leur site officiel, **sans rien modifier au système**. C'est ce que fait ce projet. Aucun risque d'abîmer la calculatrice.
+
+---
+
+## Installer l'application
+
+1. Télécharger le fichier [`release/outils.nwa`](release/outils.nwa) (bouton « Download raw file » sur GitHub).
+2. Sur un ordinateur, ouvrir **https://my.numworks.com/apps** avec **Chrome ou Edge** (Firefox et Safari ne savent pas parler à la calculatrice en USB).
+3. Brancher la calculatrice en USB, l'allumer : l'écran « CALCULATRICE CONNECTÉE » s'affiche.
+4. Suivre le site : choisir le fichier `outils.nwa`, puis installer.
+5. L'application **Outils** apparaît à la fin de l'écran d'accueil.
+
+> ⚠️ Le site **remplace** les applications externes déjà installées. Si d'autres applications sont installées, les ajouter toutes en même temps dans le site.
+
+### Ce qu'il faut savoir
+
+- Les applications externes sont **cachées en mode examen**, puis reviennent quand on quitte le mode examen.
+- Un **reset** de la calculatrice (bouton au dos) **efface** les applications externes : il suffit de la réinstaller.
+- Les scripts Python, les réglages et le reste de la calculatrice ne sont pas touchés.
+
+---
+
+## Revenir à la calculatrice d'origine
+
+L'application ne modifie pas le système officiel : la calculatrice **est toujours sous l'OS d'origine** (Epsilon). Selon ce que tu veux faire :
+
+### Supprimer l'application
+
+Au choix :
+- appuyer sur le bouton **RESET** au dos avec un trombone : les applications externes sont effacées. ⚠️ Un reset efface aussi les données non sauvegardées (scripts Python, listes…). Sauvegarde d'abord tes scripts sur https://my.numworks.com.
+- ou repasser par **https://my.numworks.com/apps** et installer une liste d'applications vide (ou sans `outils.nwa`).
+
+### Remettre la calculatrice « comme neuve » (mise à jour officielle)
+
+1. Sauvegarder tes scripts Python sur https://my.numworks.com (ils seront perdus sinon).
+2. Se connecter à son compte sur **https://my.numworks.com** avec Chrome ou Edge, calculatrice branchée.
+3. Dans le menu sous son nom, choisir **Mise à jour**, puis suivre les étapes : la dernière version officielle d'Epsilon est réinstallée. Ne pas débrancher avant la fin. (Guide officiel : https://www.numworks.com/support/connect/update)
+
+### Si la calculatrice ne démarre plus (mode de secours)
+
+Très improbable avec une simple application, mais au cas où :
+1. D'abord, un simple **RESET** (bouton au dos, avec un trombone).
+2. Si ça ne suffit pas : brancher la calculatrice en USB, **maintenir la touche 6**, appuyer sur **RESET** au dos, puis **relâcher la touche 6**. L'écran reste noir et la LED s'allume : c'est le mode de récupération.
+3. Suivre la procédure officielle : https://www.numworks.com/support/connect/rescue
+
+---
+
+## Mode d'emploi
+
+### Touches générales
+
+| Touche | Action |
+|---|---|
+| Flèches haut / bas | Se déplacer dans un menu, changer de champ, faire défiler un résultat |
+| Flèches gauche / droite | Page précédente / suivante dans un long résultat |
+| Chiffres 1 à 6 | Choisir directement un élément du menu |
+| OK | Valider / champ suivant |
+| EXE | Calculer (depuis n'importe quel champ) / relancer un tirage |
+| Effacer (⌫) | Effacer le dernier caractère (shift + effacer : vider le champ) |
+| Retour | Revenir en arrière ; depuis le menu principal, quitter |
+
+**Taper des lettres :** `alpha` puis la touche donne une minuscule ; `shift`, `alpha` puis la touche donne une majuscule.
+
+### Équilibrer une équation
+
+On remplit deux champs : **Réactifs** et **Produits**, avec des espèces séparées par `+`.
+
+| Écriture | Exemple |
+|---|---|
+| Simple | `CH4+O2` |
+| Parenthèses / crochets | `Ca(OH)2`, `K4[Fe(CN)6]` |
+| Hydrate (point) | `CuSO4.5H2O` |
+| Ion : `^`, charge, signe | `Fe^3+`, `SO4^2-`, `Cl^-` (touche puissance pour `^`) |
+| Électron | `e^-` |
+
+Les symboles commencent par une majuscule (`Co` = cobalt, `CO` = monoxyde de carbone).
+
+### Résoudre un triangle
+
+Remplir **exactement 3 cases**, dont au moins un côté, et laisser les autres vides. Le côté `a` est **en face** de l'angle `A`, etc. Après le calcul, **OK** affiche le dessin à l'échelle (s'il y a 2 triangles possibles, OK passe de l'un à l'autre).
+
+### Binaire
+
+- **Conversion de bases** : choisir la base de départ ; affiche les 4 bases et la méthode (divisions successives, puissances, groupes de 4 / 3 bits). Jusqu'à 32 bits.
+- **Addition / soustraction** : posées comme sur papier, avec les retenues et la vérification en décimal.
+- **Complément à 2** : décimal vers binaire (méthode « inverser + 1 ») et l'inverse. Le nombre de bits va de 2 à 32.
+- **Flottants (IEEE 754)** : décompose un nombre en signe / exposant / mantisse sur 32 bits et montre l'erreur d'arrondi (ex : `0.1`).
+- **Entraînement** : 10 questions au hasard (conversions, complément à 2), avec correction et astuce.
+
+### Chronomètre et minuteur
+
+- Chronomètre : **OK** démarre / met en pause, **EXE** enregistre un tour, **Effacer** remet à zéro (en pause).
+- Minuteur : entrer minutes et secondes puis **EXE**. **OK** = pause, **Effacer** = recommencer. À la fin, l'écran clignote jusqu'à l'appui sur une touche (la N0110 n'a pas de haut-parleur).
+
+---
+
+## Pour les développeurs
+
+Code en C, environ 1 600 lignes, dans `src/` :
+
+| Fichier | Rôle |
+|---|---|
+| `ui.c` / `ui.h` | Menus, formulaires, texte défilant, gros chiffres, dessin |
+| `chimie.c` | Lecture des formules + équilibrage (élimination de Gauss en entiers) |
+| `triangle.c` | Résolution et dessin des triangles |
+| `binaire.c` | Conversions, opérations posées, complément à 2, IEEE 754, quiz |
+| `outils.c` | Chronomètre, minuteur, aléatoire |
+| `main.c` | Menu principal |
+
+Prérequis : `arm-none-eabi-gcc` et Node.js (le SDK officiel [`nwlink`](https://www.npmjs.com/package/nwlink) est téléchargé tout seul).
+
+```sh
+make        # -> output/outils.nwa (à installer depuis my.numworks.com/apps)
+make test   # vérifie les calculs (chimie, triangles, binaire) sur l'ordinateur
+make sim    # -> output/outils.nwb, pour le simulateur officiel :
+            #    epsilon.bin --nwb output/outils.nwb
+```
+
+Le simulateur se compile depuis [le code source d'Epsilon](https://github.com/numworks/epsilon) (`make PLATFORM=linux epsilon.bin`).
+
+Les accents sont écrits normalement dans le code : `ui_str()` les convertit pour la police de la calculatrice, qui dessine « e » + accent combinant.
