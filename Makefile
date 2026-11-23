@@ -3,7 +3,7 @@
 # make sim    -> output/outils.nwb  (simulateur Epsilon : epsilon.bin --nwb output/outils.nwb)
 NWLINK = npx --yes -- nwlink@1.0.0
 SRC = $(wildcard src/*.c)
-CFLAGS = -std=c99 -Wall -Wextra -Wno-unused-parameter -Wno-format-zero-length -Wno-format-truncation
+CFLAGS = -std=c99 -Wall -Wextra -Wno-unused-parameter -Wno-format-zero-length -Wno-format-truncation -Wno-missing-field-initializers
 SIM_CFLAGS = $(shell $(NWLINK) eadk-cflags-simulator)
 
 output/outils.nwa: $(SRC) src/ui.h output/icon.o

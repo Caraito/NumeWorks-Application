@@ -171,10 +171,12 @@ static const char *ev_text(eadk_event_t e) {
 /* ---------- Écrans génériques ---------- */
 
 int ui_menu(const char *title, const char *const items[], int n) {
-  /* ponytail: position mémorisée par nombre d'éléments, pas par menu ; deux menus
-   * de même taille partagent leur position (sans danger, juste cosmétique). */
-  static int last_sel[8];
-  int sel = last_sel[n & 7];
+  static const char *keys[24]; /* position mémorisée par menu (titre) */
+  static int sels[24];
+  int slot = 0;
+  while (slot < 23 && keys[slot] && strcmp(keys[slot], title)) slot++;
+  keys[slot] = title;
+  int sel = sels[slot] < n ? sels[slot] : 0;
   for (;;) {
     if (g_quit) return -1;
     ui_clear();
@@ -191,10 +193,10 @@ int ui_menu(const char *title, const char *const items[], int n) {
     if (e == eadk_event_up) sel = (sel + n - 1) % n;
     else if (e == eadk_event_down) sel = (sel + 1) % n;
     else if (e == eadk_event_back) return -1;
-    else if (e == eadk_event_ok || e == eadk_event_exe) { last_sel[n & 7] = sel; return sel; }
+    else if (e == eadk_event_ok || e == eadk_event_exe) { sels[slot] = sel; return sel; }
     else {
       const char *t = ev_text(e);
-      if (t && *t >= '1' && *t <= '0' + n) { last_sel[n & 7] = *t - '1'; return *t - '1'; }
+      if (t && *t >= '1' && *t <= '0' + n) { sels[slot] = *t - '1'; return *t - '1'; }
     }
   }
 }

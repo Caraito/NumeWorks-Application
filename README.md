@@ -7,6 +7,7 @@ Une application « boîte à outils » pour le lycée (niveau première), qui s'
 | Outil | Ce qu'il fait |
 |---|---|
 | **Chimie** | Équilibrage d'équations (parenthèses, crochets, hydrates, ions, électrons) ; **tableau d'avancement** (réactif limitant, x max, état final) ; **masse molaire** d'une formule ; **quantité de matière** (n = m/M, C = n/V, Cm = m/V, dilution). |
+| **Physique** | **Formules à trous** : on remplit toutes les cases sauf une, l'inconnue est calculée. 20 formules : mécanique (Ec, Epp, poids, vitesse, travail, gravitation), électricité (U = RI, P = UI, E = Pt, Q = It), ondes et lumière (v = λf, photon en J ou en eV, Snell-Descartes, lentilles, grandissement), matière (masse volumique, pression, Mariotte, Beer-Lambert). |
 | **Maths** | **Second degré** avec étapes (Δ, racines exactes comme `(-1 - √17)/4`, formes factorisée et canonique, sommet, signe) ; **suites** arithmétiques et géométriques (terme général, somme, variation). |
 | **Binaire** | Conversions de bases avec étapes, addition / soustraction posées avec retenues, complément à 2, nombres à virgule IEEE 754, entraînement noté. |
 | **Chronomètre** | Avec temps intermédiaires (tours). |
@@ -15,7 +16,7 @@ Une application « boîte à outils » pour le lycée (niveau première), qui s'
 | **Batterie** | Pourcentage estimé, tension, état de charge, temps restant mesuré, baisse depuis l'ouverture de l'écran. |
 
 ![Menu](docs/menu.png) ![Chimie](docs/chimie.png) ![Avancement](docs/avancement.png)
-![Quantité de matière](docs/quantite.png) ![Second degré](docs/second_degre.png) ![Binaire](docs/binaire.png)
+![Physique](docs/physique.png) ![Second degré](docs/second_degre.png) ![Binaire](docs/binaire.png)
 
 *(Captures prises dans le simulateur officiel NumWorks.)*
 
@@ -108,6 +109,15 @@ Les symboles commencent par une majuscule (`Co` = cobalt, `CO` = monoxyde de car
 
 **Quantité de matière** : choisir la relation, remplir toutes les cases **sauf celle à calculer** (laissée vide). Dans `n = m / M`, la case M accepte aussi une formule (`H2O`). Pour la dilution, V1 et V2 sont dans la même unité.
 
+### Physique
+
+Choisir un thème, puis une formule. **Remplir toutes les cases sauf celle à calculer** (laissée vide), puis EXE.
+- Les unités sont indiquées à côté de chaque case (unités du système international, sauf mention contraire).
+- Les angles sont en degrés. Pour Snell-Descartes, si le calcul demande sin > 1, l'outil signale la réflexion totale.
+- Lentilles : les distances sont algébriques (OA est négatif quand l'objet est avant la lentille).
+- Les grands et petits nombres s'écrivent avec la touche ×10^x : `6.67e-11`.
+- La constante G = 6,674·10⁻¹¹ est intégrée ; g est prérempli à 9,81 N/kg (modifiable).
+
 ### Maths
 
 **Second degré** : entrer a, b, c (0 si le terme est absent). Avec des coefficients entiers, les racines sont données sous forme exacte (fractions, racines carrées simplifiées), sinon en décimal.
@@ -139,12 +149,13 @@ La calculatrice ne mesure pas sa consommation : tout est **estimé** à partir d
 
 ## Pour les développeurs
 
-Code en C, environ 1 900 lignes, dans `src/` :
+Code en C, environ 2 100 lignes, dans `src/` :
 
 | Fichier | Rôle |
 |---|---|
 | `ui.c` / `ui.h` | Menus, formulaires, texte défilant, gros chiffres |
 | `chimie.c` | Lecture des formules, équilibrage (élimination de Gauss en entiers), avancement, masse molaire, quantité de matière |
+| `physique.c` | Formules à trous (aussi utilisées par « Quantité de matière ») |
 | `maths.c` | Second degré, suites |
 | `binaire.c` | Conversions, opérations posées, complément à 2, IEEE 754, quiz |
 | `outils.c` | Chronomètre, minuteur, aléatoire, batterie |
@@ -154,7 +165,7 @@ Prérequis : `arm-none-eabi-gcc` et Node.js (le SDK officiel [`nwlink`](https://
 
 ```sh
 make        # -> output/outils.nwa (à installer depuis my.numworks.com/apps)
-make test   # vérifie les calculs (chimie, maths, binaire, batterie) sur l'ordinateur
+make test   # vérifie les calculs (chimie, physique, maths, binaire, batterie) sur l'ordinateur
 make sim    # -> output/outils.nwb, pour le simulateur officiel :
             #    epsilon.bin --nwb output/outils.nwb
 ```

@@ -49,6 +49,8 @@ void fmt_num(char *dst, double v); /* 4 décimales max, zéros inutiles retirés
 /* Les outils */
 void chimie_app(void);
 void maths_app(void);
+void physique_app(void);
+void formules_menu(int group); /* 0 : quantité de matière */
 void binaire_app(void);
 void chrono_app(void);
 void minuteur_app(void);
@@ -60,7 +62,7 @@ bool chimie_explain(const char *reactifs, const char *produits);
 bool avancement_explain(const char *reactifs, const char *produits, const char *quantites);
 double masse_molaire(const char *formule, bool detail); /* < 0 si erreur */
 void masse_explain(const char *formule);
-void qte_explain(int relation, char f[4][FIELDLEN]);
+bool formule_explain(int idx, char f[5][FIELDLEN]);
 void second_degre_explain(const char *a, const char *b, const char *c);
 void suite_explain(bool geo, const char *u0, const char *raison, const char *n);
 int pct_from_voltage(float v);

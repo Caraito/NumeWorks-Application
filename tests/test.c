@@ -69,17 +69,50 @@ int main(void) {
   expect("quantités manquantes", "au moins la quantité");
 
   {
-    char q[4][FIELDLEN] = {"", "H2O", "9"};
-    qte_explain(0, q);
+    char q[5][FIELDLEN] = {"", "H2O", "9"};
+    formule_explain(0, q);
     expect("n=m/M formule", "M calculée à partir de la formule H2O");
     expect("n=m/M M", "M = 18.015 g/mol");
     expect("n=m/M", "Résultat : n = 0.4996 mol");
-    char d[4][FIELDLEN] = {"0.1", "", "0.01", "100"};
-    qte_explain(3, d);
+    char d[5][FIELDLEN] = {"0.1", "", "0.01", "100"};
+    formule_explain(3, d);
     expect("dilution", "Résultat : V1 = 10");
-    char e[4][FIELDLEN] = {"1", "", ""};
-    qte_explain(1, e);
+    char e[5][FIELDLEN] = {"1", "", ""};
+    formule_explain(1, e);
     expect("deux vides", "exactement une case");
+    char ec[5][FIELDLEN] = {"", "2", "3"};
+    formule_explain(4, ec);
+    expect("Ec", "Résultat : Ec = 9 J");
+    char ev[5][FIELDLEN] = {"9", "2", ""};
+    formule_explain(4, ev);
+    expect("Ec -> v", "Résultat : v = 3 m/s");
+    char gr[5][FIELDLEN] = {"", "5.972e24", "70", "6.371e6"};
+    formule_explain(9, gr);
+    expect("gravitation", "Résultat : F = 687.");
+    char ur[5][FIELDLEN] = {"12", "", "0.5"};
+    formule_explain(10, ur);
+    expect("U=RI", "Résultat : R = 24 \xce\xa9");
+    char ph[5][FIELDLEN] = {"", "500"};
+    formule_explain(16, ph);
+    expect("photon eV", "Résultat : E = 2.4797 eV");
+    char sn[5][FIELDLEN] = {"1", "30", "1.5", ""};
+    formule_explain(17, sn);
+    expect("Snell", "Résultat : i2 = 19.4712");
+    char tot[5][FIELDLEN] = {"1.5", "60", "1", ""};
+    formule_explain(17, tot);
+    expect("réflexion totale", "réflexion totale");
+    char cj[5][FIELDLEN] = {"", "-30", "10"};
+    formule_explain(18, cj);
+    expect("conjugaison", "Résultat : OA' = 15 cm");
+    char cf[5][FIELDLEN] = {"", "-10", "10"};
+    formule_explain(18, cf);
+    expect("objet au foyer", "infini");
+    char w[5][FIELDLEN] = {"", "10", "5", "60"};
+    formule_explain(8, w);
+    expect("travail cos", "Résultat : W = 25 J");
+    char wa[5][FIELDLEN] = {"25", "10", "5", ""};
+    formule_explain(8, wa);
+    expect("travail angle", "Résultat : \xce\xb1 = 60");
   }
 
   second_degre_explain("2", "-4", "-6");
