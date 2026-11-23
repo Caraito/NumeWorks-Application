@@ -47,15 +47,15 @@ bool parse_long(const char *s, long *v);
 void fmt_num(char *dst, double v); /* 4 décimales max, zéros inutiles retirés */
 
 /* Les outils */
-void chimie_app(void);
 void maths_app(void);
-void physique_app(void);
-void formules_menu(int group); /* 0 : quantité de matière */
+void physchim_app(void);
+void formules_menu(int group); /* 0 : quantité de matière, 1-4 : physique */
 void binaire_app(void);
 void chrono_app(void);
 void minuteur_app(void);
 void aleatoire_app(void);
 void batterie_app(void);
+void utilitaires_app(void);
 
 /* Parties « calcul » testables (remplissent out[]) */
 bool chimie_explain(const char *reactifs, const char *produits);

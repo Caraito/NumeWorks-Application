@@ -416,7 +416,7 @@ void binaire_app(void) {
   static const char *const l_c2e[] = {"Entier", "Nb de bits"};
   static const char *const l_c2d[] = {"Bits"};
   for (;;) {
-    int m = ui_menu("Binaire", menu, 5), k;
+    int m = ui_menu("NSI", menu, 5), k;
     if (m < 0) return;
     switch (m) {
       case 0:

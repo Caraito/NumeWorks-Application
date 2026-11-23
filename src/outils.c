@@ -315,3 +315,13 @@ void batterie_app(void) {
     if (e == eadk_event_back || g_quit) return;
   }
 }
+
+void utilitaires_app(void) {
+  static const char *const menu[] = {"Chronomètre", "Minuteur", "Nombres aléatoires", "Batterie"};
+  static void (*const apps[])(void) = {chrono_app, minuteur_app, aleatoire_app, batterie_app};
+  for (;;) {
+    int k = ui_menu("Utilitaires", menu, 4);
+    if (k < 0) return;
+    apps[k]();
+  }
+}

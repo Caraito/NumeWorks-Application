@@ -180,12 +180,3 @@ void formules_menu(int group) {
     }
   }
 }
-
-void physique_app(void) {
-  static const char *const menu[] = {"Mécanique", "Électricité", "Ondes et lumière", "Matière et fluides"};
-  for (;;) {
-    int k = ui_menu("Physique", menu, 4);
-    if (k < 0) return;
-    formules_menu(k + 1);
-  }
-}

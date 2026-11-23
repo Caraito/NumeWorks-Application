@@ -373,21 +373,22 @@ void masse_explain(const char *formule) {
   outf("M = %s g/mol", t);
 }
 
-void chimie_app(void) {
+void physchim_app(void) {
   static const char *const menu[] = {"Équilibrer une équation", "Tableau d'avancement", "Masse molaire",
-                                     "Quantité de matière"};
+                                     "Quantité de matière", "Mécanique", "Électricité", "Ondes et lumière",
+                                     "Matière et fluides"};
   static const char *const l_eq[] = {"Réactifs", "Produits", "n init (mol)"};
   static const char *const l_mm[] = {"Formule"};
   static char eq[3][FIELDLEN] = {"CH4+O2", "CO2+H2O", "2, 3"};
   static char mm[1][FIELDLEN] = {"C6H12O6"};
   for (;;) {
-    int k = ui_menu("Chimie", menu, 4);
+    int k = ui_menu("Physique-chimie", menu, 8);
     if (k < 0) return;
     switch (k) {
       case 0: while (ui_form("Équilibrer", l_eq, eq, 2)) { chimie_explain(eq[0], eq[1]); ui_text("Équilibrage", ""); } break;
       case 1: while (ui_form("Avancement", l_eq, eq, 3)) { avancement_explain(eq[0], eq[1], eq[2]); ui_text("Avancement", ""); } break;
       case 2: while (ui_form("Masse molaire", l_mm, mm, 1)) { masse_explain(mm[0]); ui_text("Masse molaire", ""); } break;
-      case 3: formules_menu(0); break;
+      default: formules_menu(k - 3); break; /* 3 : quantité de matière, 4+ : physique */
     }
   }
 }

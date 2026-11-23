@@ -4,16 +4,14 @@
 
 Une application « boîte à outils » pour le lycée (niveau première), qui s'installe **à côté** du système officiel de la calculatrice :
 
-| Outil | Ce qu'il fait |
+Le menu principal a quatre parties :
+
+| Partie | Contenu |
 |---|---|
-| **Chimie** | Équilibrage d'équations (parenthèses, crochets, hydrates, ions, électrons) ; **tableau d'avancement** (réactif limitant, x max, état final) ; **masse molaire** d'une formule ; **quantité de matière** (n = m/M, C = n/V, Cm = m/V, dilution). |
-| **Physique** | **Formules à trous** : on remplit toutes les cases sauf une, l'inconnue est calculée. 20 formules : mécanique (Ec, Epp, poids, vitesse, travail, gravitation), électricité (U = RI, P = UI, E = Pt, Q = It), ondes et lumière (v = λf, photon en J ou en eV, Snell-Descartes, lentilles, grandissement), matière (masse volumique, pression, Mariotte, Beer-Lambert). |
 | **Maths** | **Second degré** avec étapes (Δ, racines exactes comme `(-1 - √17)/4`, formes factorisée et canonique, sommet, signe) ; **suites** arithmétiques et géométriques (terme général, somme, variation). |
-| **Binaire** | Conversions de bases avec étapes, addition / soustraction posées avec retenues, complément à 2, nombres à virgule IEEE 754, entraînement noté. |
-| **Chronomètre** | Avec temps intermédiaires (tours). |
-| **Minuteur** | Alerte visuelle (écran qui clignote) à la fin. |
-| **Nombres aléatoires** | Entiers dans un intervalle, tirage sans doublon, dés, pile ou face, mélange de 1 à n. |
-| **Batterie** | Pourcentage estimé, tension, état de charge, temps restant mesuré, baisse depuis l'ouverture de l'écran. |
+| **Physique-chimie** | **Chimie** : équilibrage d'équations (parenthèses, crochets, hydrates, ions, électrons), **tableau d'avancement** (réactif limitant, x max, état final), **masse molaire** d'une formule, **quantité de matière** (n = m/M, C = n/V, Cm = m/V, dilution). **Physique** : **formules à trous**, on remplit toutes les cases sauf une et l'inconnue est calculée (mécanique, électricité, ondes et lumière, matière et fluides : 20 formules). |
+| **NSI** | Conversions de bases avec étapes, addition / soustraction posées avec retenues, complément à 2, nombres à virgule IEEE 754, entraînement noté. |
+| **Utilitaires** | **Chronomètre** avec tours, **minuteur** avec alerte visuelle, **nombres aléatoires** (intervalle, sans doublon, dés, pile ou face, mélange), **batterie** (pourcentage estimé, état de charge, temps restant mesuré). |
 
 ![Menu](docs/menu.png) ![Chimie](docs/chimie.png) ![Avancement](docs/avancement.png)
 ![Physique](docs/physique.png) ![Second degré](docs/second_degre.png) ![Binaire](docs/binaire.png)
@@ -89,7 +87,15 @@ Très improbable avec une simple application, mais au cas où :
 
 **Taper des lettres :** `alpha` puis la touche donne une minuscule ; `shift`, `alpha` puis la touche donne une majuscule.
 
-### Chimie
+### Maths
+
+**Second degré** : entrer a, b, c (0 si le terme est absent). Avec des coefficients entiers, les racines sont données sous forme exacte (fractions, racines carrées simplifiées), sinon en décimal.
+
+**Suites** : entrer u0, la raison (r ou q) et n. L'outil donne u(n), la somme u0 + … + u(n), le sens de variation et les premiers termes.
+
+### Physique-chimie
+
+#### Chimie
 
 **Équilibrer une équation** : on remplit deux champs : **Réactifs** et **Produits**, avec des espèces séparées par `+`.
 
@@ -109,7 +115,7 @@ Les symboles commencent par une majuscule (`Co` = cobalt, `CO` = monoxyde de car
 
 **Quantité de matière** : choisir la relation, remplir toutes les cases **sauf celle à calculer** (laissée vide). Dans `n = m / M`, la case M accepte aussi une formule (`H2O`). Pour la dilution, V1 et V2 sont dans la même unité.
 
-### Physique
+#### Physique
 
 Choisir un thème, puis une formule. **Remplir toutes les cases sauf celle à calculer** (laissée vide), puis EXE.
 - Les unités sont indiquées à côté de chaque case (unités du système international, sauf mention contraire).
@@ -118,13 +124,7 @@ Choisir un thème, puis une formule. **Remplir toutes les cases sauf celle à ca
 - Les grands et petits nombres s'écrivent avec la touche ×10^x : `6.67e-11`.
 - La constante G = 6,674·10⁻¹¹ est intégrée ; g est prérempli à 9,81 N/kg (modifiable).
 
-### Maths
-
-**Second degré** : entrer a, b, c (0 si le terme est absent). Avec des coefficients entiers, les racines sont données sous forme exacte (fractions, racines carrées simplifiées), sinon en décimal.
-
-**Suites** : entrer u0, la raison (r ou q) et n. L'outil donne u(n), la somme u0 + … + u(n), le sens de variation et les premiers termes.
-
-### Binaire
+### NSI
 
 - **Conversion de bases** : choisir la base de départ ; affiche les 4 bases et la méthode (divisions successives, puissances, groupes de 4 / 3 bits). Jusqu'à 32 bits.
 - **Addition / soustraction** : posées comme sur papier, avec les retenues et la vérification en décimal.
@@ -132,20 +132,22 @@ Choisir un thème, puis une formule. **Remplir toutes les cases sauf celle à ca
 - **Flottants (IEEE 754)** : décompose un nombre en signe / exposant / mantisse sur 32 bits et montre l'erreur d'arrondi (ex : `0.1`).
 - **Entraînement** : 10 questions au hasard (conversions, complément à 2), avec correction et astuce.
 
-### Batterie
+### Utilitaires
+
+#### Chronomètre et minuteur
+
+- Chronomètre : **OK** démarre / met en pause, **EXE** enregistre un tour, **Effacer** remet à zéro (en pause).
+- Minuteur : entrer minutes et secondes puis **EXE**. **OK** = pause, **Effacer** = recommencer. À la fin, l'écran clignote jusqu'à l'appui sur une touche (la N0110 n'a pas de haut-parleur).
+
+---
+
+#### Batterie
 
 La calculatrice ne mesure pas sa consommation : tout est **estimé** à partir de la tension de la batterie.
 - **Pourcentage** : estimé d'après la tension (courbe typique d'une batterie lithium). Il est faussé pendant la charge.
 - **Depuis l'ouverture** : baisse du pourcentage depuis l'ouverture de l'écran.
 - **Temps restant mesuré** : calculé au rythme de baisse constaté, seulement si l'écran reste ouvert au moins 10 minutes et que le pourcentage a baissé. Plus on attend, plus c'est fiable.
 - Pas d'historique sur plusieurs jours : une application externe ne peut pas garder de données entre deux ouvertures.
-
-### Chronomètre et minuteur
-
-- Chronomètre : **OK** démarre / met en pause, **EXE** enregistre un tour, **Effacer** remet à zéro (en pause).
-- Minuteur : entrer minutes et secondes puis **EXE**. **OK** = pause, **Effacer** = recommencer. À la fin, l'écran clignote jusqu'à l'appui sur une touche (la N0110 n'a pas de haut-parleur).
-
----
 
 ## Pour les développeurs
 
@@ -154,11 +156,11 @@ Code en C, environ 2 100 lignes, dans `src/` :
 | Fichier | Rôle |
 |---|---|
 | `ui.c` / `ui.h` | Menus, formulaires, texte défilant, gros chiffres |
-| `chimie.c` | Lecture des formules, équilibrage (élimination de Gauss en entiers), avancement, masse molaire, quantité de matière |
+| `chimie.c` | Menu Physique-chimie, lecture des formules, équilibrage (élimination de Gauss en entiers), avancement, masse molaire, quantité de matière |
 | `physique.c` | Formules à trous (aussi utilisées par « Quantité de matière ») |
 | `maths.c` | Second degré, suites |
-| `binaire.c` | Conversions, opérations posées, complément à 2, IEEE 754, quiz |
-| `outils.c` | Chronomètre, minuteur, aléatoire, batterie |
+| `binaire.c` | NSI : conversions, opérations posées, complément à 2, IEEE 754, quiz |
+| `outils.c` | Utilitaires : chronomètre, minuteur, aléatoire, batterie |
 | `main.c` | Menu principal |
 
 Prérequis : `arm-none-eabi-gcc` et Node.js (le SDK officiel [`nwlink`](https://www.npmjs.com/package/nwlink) est téléchargé tout seul).
