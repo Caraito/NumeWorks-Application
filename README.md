@@ -1,3 +1,5 @@
+<img src="docs/logo.png" width="110" align="right" alt="Logo">
+
 # Outils — application pour NumWorks N0110
 
 Une application « boîte à outils » pour le lycée (niveau première), qui s'installe **à côté** du système officiel de la calculatrice :
