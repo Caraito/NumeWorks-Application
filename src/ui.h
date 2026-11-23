@@ -40,7 +40,6 @@ eadk_event_t ui_text(const char *title, const char *hint); /* retour / OK / EXE 
 void ui_message(const char *title, const char *msg);
 
 void ui_big(int y, const char *s, eadk_color_t fg); /* chiffres 7 segments, centrés */
-void ui_line(int x0, int y0, int x1, int y1, eadk_color_t c);
 
 uint32_t rnd(uint32_t n); /* uniforme dans [0, n) */
 bool parse_double(const char *s, double *v);
@@ -49,15 +48,22 @@ void fmt_num(char *dst, double v); /* 4 décimales max, zéros inutiles retirés
 
 /* Les outils */
 void chimie_app(void);
-void triangle_app(void);
+void maths_app(void);
 void binaire_app(void);
 void chrono_app(void);
 void minuteur_app(void);
 void aleatoire_app(void);
+void batterie_app(void);
 
 /* Parties « calcul » testables (remplissent out[]) */
 bool chimie_explain(const char *reactifs, const char *produits);
-void triangle_explain(char f[6][FIELDLEN], bool radians);
+bool avancement_explain(const char *reactifs, const char *produits, const char *quantites);
+double masse_molaire(const char *formule, bool detail); /* < 0 si erreur */
+void masse_explain(const char *formule);
+void qte_explain(int relation, char f[4][FIELDLEN]);
+void second_degre_explain(const char *a, const char *b, const char *c);
+void suite_explain(bool geo, const char *u0, const char *raison, const char *n);
+int pct_from_voltage(float v);
 void bin_convert_explain(const char *s, int base);
 void bin_op_explain(const char *a, const char *b, bool sub);
 void c2_encode_explain(const char *val, const char *bits);

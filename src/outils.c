@@ -245,3 +245,73 @@ void aleatoire_app(void) {
     }
   }
 }
+
+/* ---------- Batterie ---------- */
+
+/* ponytail: valeurs « hardware » approximatives, à ajuster sur la vraie calculatrice. */
+#define AUTONOMIE_H 20 /* heures d'utilisation pour une charge complète (supposé) */
+static const float VOLT[][2] = {{4.20f, 100}, {4.10f, 90}, {4.00f, 80}, {3.93f, 70}, {3.87f, 60}, {3.82f, 50},
+                                {3.79f, 40},  {3.77f, 30}, {3.74f, 20}, {3.70f, 10}, {3.60f, 5},  {3.30f, 0}};
+
+int pct_from_voltage(float v) { /* courbe typique d'une batterie lithium, au repos */
+  if (v >= VOLT[0][0]) return 100;
+  for (unsigned i = 1; i < sizeof VOLT / sizeof VOLT[0]; i++)
+    if (v >= VOLT[i][0])
+      return (int)(VOLT[i][1] + (v - VOLT[i][0]) / (VOLT[i - 1][0] - VOLT[i][0]) * (VOLT[i - 1][1] - VOLT[i][1]) + 0.5f);
+  return 0;
+}
+
+#if PLATFORM_DEVICE
+/* nwlink 1.0.0 ne relie pas les fonctions batterie sur la calculatrice : appel système direct.
+ * ponytail: numéros repris d'Epsilon (ion/src/device/shared/drivers/svcall.h, liste stable
+ * jusqu'ici) ; s'ils changent dans une future version, l'écran batterie affichera n'importe quoi. */
+__attribute__((noinline)) float eadk_battery_voltage(void) {
+  float v;
+  __asm__ volatile("svc 5 ; vmov %0, s0" : "=r"(v) : : "r0", "r1", "r2", "r3");
+  return v;
+}
+__attribute__((noinline)) bool eadk_battery_is_charging(void) {
+  bool c;
+  __asm__ volatile("svc 3 ; mov %0, r0" : "=r"(c) : : "r0", "r1", "r2", "r3");
+  return c;
+}
+#endif
+
+void batterie_app(void) {
+  uint64_t t0 = eadk_timing_millis();
+  float avg = eadk_battery_voltage();
+  int p0 = -1;
+  ui_clear();
+  ui_header("Batterie", "");
+  ui_str(8, 222, "Mise à jour chaque seconde", false, C_GRAY, C_BG);
+  for (;;) {
+    avg = 0.9f * avg + 0.1f * eadk_battery_voltage(); /* lissage : la tension bouge un peu */
+    int pct = pct_from_voltage(avg);
+    bool charging = eadk_battery_is_charging();
+    if (p0 < 0) p0 = pct;
+    uint32_t min = (uint32_t)((eadk_timing_millis() - t0) / 60000);
+
+    char t[64];
+    sprintf(t, "%d", pct);
+    eadk_display_push_rect_uniform((eadk_rect_t){0, 30, 320, 60}, C_BG);
+    ui_big(32, t, pct <= 20 ? C_BAD : C_TEXT);
+    int w = strlen(t) * 34 - 6;
+    ui_str((320 + w) / 2 + 6, 62, "%", true, C_TEXT, C_BG);
+
+    out_clear();
+    char v[16];
+    fmt_num(v, avg);
+    outf("Estimation d'après la tension : %s V", v);
+    outf("État : %s", charging ? "en charge" : "sur batterie");
+    if (charging) outf("En charge : la tension (et le %%) sont faussés.");
+    else outf("Temps restant : ~%d h (sur %d h par charge)", pct * AUTONOMIE_H / 100, AUTONOMIE_H);
+    outf("Depuis l'ouverture : %lu min, %+d %%", (unsigned long)min, pct - p0);
+    if (!charging && min >= 10 && p0 > pct)
+      outf("Rythme mesuré : environ %lu h pour 100 %%", (unsigned long)(min * 100 / (p0 - pct) / 60));
+    eadk_display_push_rect_uniform((eadk_rect_t){0, 96, 320, 120}, C_BG);
+    for (int i = 0; i < nout; i++) ui_str(8, 100 + i * 17, out[i], false, C_TEXT, C_BG);
+
+    eadk_event_t e = ui_event(1000);
+    if (e == eadk_event_back || g_quit) return;
+  }
+}

@@ -14,6 +14,8 @@ void eadk_backlight_set_brightness(uint8_t b) {}
 uint8_t eadk_backlight_brightness(void) { return 100; }
 uint32_t _eadk_timing_millis_low(void) { return 0; }
 uint32_t _eadk_timing_millis_high(void) { return 0; }
+float eadk_battery_voltage(void) { return 3.9f; }
+bool eadk_battery_is_charging(void) { return false; }
 
 static int fails;
 
@@ -23,13 +25,6 @@ static void expect(const char *what, const char *needle) {
     printf("ÉCHEC %s : « %s » absent. Sortie :\n", what, needle);
     for (int i = 0; i < nout; i++) printf("  | %s\n", out[i]);
   }
-}
-
-static void tri(const char *a, const char *b, const char *c, const char *A, const char *B, const char *C) {
-  char f[6][FIELDLEN];
-  const char *v[6] = {a, b, c, A, B, C};
-  for (int i = 0; i < 6; i++) strcpy(f[i], v[i]);
-  triangle_explain(f, false);
 }
 
 int main(void) {
@@ -57,23 +52,70 @@ int main(void) {
   chimie_explain("Ca(OH2", "H2O");
   expect("parenthèse", "Parenthèse non fermée");
 
-  tri("3", "4", "", "", "", "90");
-  expect("SAS c", "c = 5 ");
-  expect("SAS A", "A = 36.8699");
-  expect("SAS aire", "Aire = 6");
-  expect("rectangle", "Triangle rectangle en C");
-  tri("3", "4", "5", "", "", "");
-  expect("SSS", "C = 90");
-  tri("5", "8", "", "30", "", "");
-  expect("SSA ambigu", "2 triangles possibles");
-  expect("SSA B1", "B = 53.1301");
-  expect("SSA B2", "B = 126.8699");
-  tri("10", "", "", "60", "60", "");
-  expect("ASA", "Triangle équilatéral");
-  tri("1", "2", "5", "", "", "");
-  expect("inégalité", "inégalité triangulaire");
-  tri("1", "", "", "", "", "");
-  expect("pas assez", "exactement 3 cases");
+  masse_explain("C6H12O6");
+  expect("masse molaire", "M = 180.156 g/mol");
+  expect("masse détail", "C  : 6 x 12.011 = 72.066");
+  masse_explain("Ca(OH)2");
+  expect("masse parenthèses", "M = 74.092 g/mol");
+
+  avancement_explain("CH4+O2", "CO2+H2O", "2, 3");
+  expect("limitant", "Réactif limitant : O2");
+  expect("xmax", "x max = 1.5 mol");
+  expect("final réactif", "CH4 : 2 - 1 x max = 0.5");
+  expect("final produit", "H2O : 0 + 2 x max = 3");
+  avancement_explain("CH4+O2", "CO2+H2O", "2, 4");
+  expect("stoechio", "stoechiométrique");
+  avancement_explain("CH4+O2", "CO2+H2O", "2");
+  expect("quantités manquantes", "au moins la quantité");
+
+  {
+    char q[4][FIELDLEN] = {"", "H2O", "9"};
+    qte_explain(0, q);
+    expect("n=m/M formule", "M calculée à partir de la formule H2O");
+    expect("n=m/M M", "M = 18.015 g/mol");
+    expect("n=m/M", "Résultat : n = 0.4996 mol");
+    char d[4][FIELDLEN] = {"0.1", "", "0.01", "100"};
+    qte_explain(3, d);
+    expect("dilution", "Résultat : V1 = 10");
+    char e[4][FIELDLEN] = {"1", "", ""};
+    qte_explain(1, e);
+    expect("deux vides", "exactement une case");
+  }
+
+  second_degre_explain("2", "-4", "-6");
+  expect("delta", "\xce\x94 = b^2 - 4ac = (-4)^2 - 4 \xc3\x97 2 \xc3\x97 (-6) = 64");
+  expect("x1", "x1 = -1");
+  expect("factorisée", "f(x) = 2(x + 1)(x - 3)");
+  expect("canonique", "f(x) = 2(x - 1)^2 - 8");
+  expect("sommet", "Sommet S(1 ; -8) : minimum");
+  expect("signe", "f(x) < 0 sur ]-1 ; 3[");
+  second_degre_explain("1", "-2", "-1");
+  expect("racine exacte", "1 - \xe2\x88\x9a" "2");
+  second_degre_explain("1", "0", "-2");
+  expect("racine exacte b=0", "x1 = -\xe2\x88\x9a" "2");
+  second_degre_explain("2", "1", "-2");
+  expect("racine exacte fraction", "(-1 - \xe2\x88\x9a" "17)/4");
+  second_degre_explain("1", "2", "1");
+  expect("double", "f(x) = (x + 1)^2");
+  second_degre_explain("1", "0", "1");
+  expect("delta négatif", "pas de racine réelle");
+  second_degre_explain("0", "1", "1");
+  expect("a nul", "a = 0");
+
+  suite_explain(false, "3", "2", "10");
+  expect("arith un", "u(10) = 3 + 10 \xc3\x97 2 = 23");
+  expect("arith somme", "= 143");
+  suite_explain(true, "2", "3", "5");
+  expect("geo un", "= 486");
+  expect("geo somme", "= 728");
+  expect("geo variation", "croissante");
+
+  if (pct_from_voltage(4.2f) != 100 || pct_from_voltage(3.82f) != 50 || pct_from_voltage(3.0f) != 0 ||
+      pct_from_voltage(3.85f) != 56) {
+    fails++;
+    printf("ÉCHEC batterie : %d %d %d %d\n", pct_from_voltage(4.2f), pct_from_voltage(3.82f), pct_from_voltage(3.0f),
+           pct_from_voltage(3.85f));
+  }
 
   bin_convert_explain("156", 10);
   expect("dec->bin", "Binaire     : 1001 1100");

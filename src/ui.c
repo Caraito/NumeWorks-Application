@@ -313,19 +313,6 @@ void ui_big(int y, const char *s, eadk_color_t fg) {
   }
 }
 
-void ui_line(int x0, int y0, int x1, int y1, eadk_color_t c) {
-  int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1, dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
-  int err = dx + dy;
-  for (;;) {
-    if (x0 >= 0 && y0 >= 0 && x0 < 319 && y0 < 239)
-      eadk_display_push_rect_uniform((eadk_rect_t){x0, y0, 2, 2}, c);
-    if (x0 == x1 && y0 == y1) return;
-    int e2 = 2 * err;
-    if (e2 >= dy) { err += dy; x0 += sx; }
-    if (e2 <= dx) { err += dx; y0 += sy; }
-  }
-}
-
 /* ---------- Divers ---------- */
 
 uint32_t rnd(uint32_t n) {

@@ -4,15 +4,16 @@ Une application « boîte à outils » pour le lycée (niveau première), qui s'
 
 | Outil | Ce qu'il fait |
 |---|---|
-| **Équilibrer une équation** | Équilibre une équation chimique (parenthèses, crochets, hydrates, ions, électrons) et affiche la vérification atome par atome. |
-| **Résoudre un triangle** | À partir de 3 valeurs (côtés / angles), calcule tout le reste, la méthode (Al-Kashi, loi des sinus), l'aire, la nature du triangle, et le dessine. Gère le cas ambigu à 2 solutions. Degrés ou radians. |
+| **Chimie** | Équilibrage d'équations (parenthèses, crochets, hydrates, ions, électrons) ; **tableau d'avancement** (réactif limitant, x max, état final) ; **masse molaire** d'une formule ; **quantité de matière** (n = m/M, C = n/V, Cm = m/V, dilution). |
+| **Maths** | **Second degré** avec étapes (Δ, racines exactes comme `(-1 - √17)/4`, formes factorisée et canonique, sommet, signe) ; **suites** arithmétiques et géométriques (terme général, somme, variation). |
 | **Binaire** | Conversions de bases avec étapes, addition / soustraction posées avec retenues, complément à 2, nombres à virgule IEEE 754, entraînement noté. |
 | **Chronomètre** | Avec temps intermédiaires (tours). |
 | **Minuteur** | Alerte visuelle (écran qui clignote) à la fin. |
 | **Nombres aléatoires** | Entiers dans un intervalle, tirage sans doublon, dés, pile ou face, mélange de 1 à n. |
+| **Batterie** | Pourcentage estimé, tension, état de charge, temps restant approximatif, baisse depuis l'ouverture de l'écran. |
 
-![Menu](docs/menu.png) ![Chimie](docs/chimie.png) ![Triangle](docs/triangle.png)
-![Dessin](docs/dessin.png) ![Binaire](docs/binaire.png) ![Complément à 2](docs/complement2.png)
+![Menu](docs/menu.png) ![Chimie](docs/chimie.png) ![Avancement](docs/avancement.png)
+![Quantité de matière](docs/quantite.png) ![Second degré](docs/second_degre.png) ![Binaire](docs/binaire.png)
 
 *(Captures prises dans le simulateur officiel NumWorks.)*
 
@@ -85,9 +86,9 @@ Très improbable avec une simple application, mais au cas où :
 
 **Taper des lettres :** `alpha` puis la touche donne une minuscule ; `shift`, `alpha` puis la touche donne une majuscule.
 
-### Équilibrer une équation
+### Chimie
 
-On remplit deux champs : **Réactifs** et **Produits**, avec des espèces séparées par `+`.
+**Équilibrer une équation** : on remplit deux champs : **Réactifs** et **Produits**, avec des espèces séparées par `+`.
 
 | Écriture | Exemple |
 |---|---|
@@ -99,9 +100,17 @@ On remplit deux champs : **Réactifs** et **Produits**, avec des espèces sépar
 
 Les symboles commencent par une majuscule (`Co` = cobalt, `CO` = monoxyde de carbone).
 
-### Résoudre un triangle
+**Tableau d'avancement** : mêmes champs Réactifs / Produits (partagés avec l'équilibrage), plus **n init (mol)** : les quantités initiales dans l'ordre des espèces, **séparées par des virgules** (`2, 3`). Les produits non indiqués valent 0. Les décimales s'écrivent avec la touche point (`0.5`).
 
-Remplir **exactement 3 cases**, dont au moins un côté, et laisser les autres vides. Le côté `a` est **en face** de l'angle `A`, etc. Après le calcul, **OK** affiche le dessin à l'échelle (s'il y a 2 triangles possibles, OK passe de l'un à l'autre).
+**Masse molaire** : taper une formule (`C6H12O6`, `Ca(OH)2`, `CuSO4.5H2O`). Masses atomiques de référence (H = 1,008 ; C = 12,011 ; O = 15,999…), donc le résultat peut différer légèrement d'un manuel qui arrondit (H = 1 ; C = 12 ; O = 16).
+
+**Quantité de matière** : choisir la relation, remplir toutes les cases **sauf celle à calculer** (laissée vide). Dans `n = m / M`, la case M accepte aussi une formule (`H2O`). Pour la dilution, V1 et V2 sont dans la même unité.
+
+### Maths
+
+**Second degré** : entrer a, b, c (0 si le terme est absent). Avec des coefficients entiers, les racines sont données sous forme exacte (fractions, racines carrées simplifiées), sinon en décimal.
+
+**Suites** : entrer u0, la raison (r ou q) et n. L'outil donne u(n), la somme u0 + … + u(n), le sens de variation et les premiers termes.
 
 ### Binaire
 
@@ -110,6 +119,14 @@ Remplir **exactement 3 cases**, dont au moins un côté, et laisser les autres v
 - **Complément à 2** : décimal vers binaire (méthode « inverser + 1 ») et l'inverse. Le nombre de bits va de 2 à 32.
 - **Flottants (IEEE 754)** : décompose un nombre en signe / exposant / mantisse sur 32 bits et montre l'erreur d'arrondi (ex : `0.1`).
 - **Entraînement** : 10 questions au hasard (conversions, complément à 2), avec correction et astuce.
+
+### Batterie
+
+La calculatrice ne mesure pas sa consommation : tout est **estimé** à partir de la tension de la batterie.
+- **Pourcentage** : estimé d'après la tension (courbe typique d'une batterie lithium). Il est faussé pendant la charge.
+- **Temps restant** : pourcentage × autonomie d'une charge complète, supposée de **20 h** d'utilisation. À ajuster dans `src/outils.c` (`AUTONOMIE_H`) selon l'autonomie réelle constatée.
+- **Depuis l'ouverture** : baisse du pourcentage depuis l'ouverture de l'écran ; après 10 minutes, un « rythme mesuré » s'affiche. Ce n'est significatif que si on laisse l'écran ouvert longtemps.
+- Pas d'historique sur plusieurs jours : une application externe ne peut pas garder de données entre deux ouvertures.
 
 ### Chronomètre et minuteur
 
@@ -120,26 +137,28 @@ Remplir **exactement 3 cases**, dont au moins un côté, et laisser les autres v
 
 ## Pour les développeurs
 
-Code en C, environ 1 600 lignes, dans `src/` :
+Code en C, environ 1 900 lignes, dans `src/` :
 
 | Fichier | Rôle |
 |---|---|
-| `ui.c` / `ui.h` | Menus, formulaires, texte défilant, gros chiffres, dessin |
-| `chimie.c` | Lecture des formules + équilibrage (élimination de Gauss en entiers) |
-| `triangle.c` | Résolution et dessin des triangles |
+| `ui.c` / `ui.h` | Menus, formulaires, texte défilant, gros chiffres |
+| `chimie.c` | Lecture des formules, équilibrage (élimination de Gauss en entiers), avancement, masse molaire, quantité de matière |
+| `maths.c` | Second degré, suites |
 | `binaire.c` | Conversions, opérations posées, complément à 2, IEEE 754, quiz |
-| `outils.c` | Chronomètre, minuteur, aléatoire |
+| `outils.c` | Chronomètre, minuteur, aléatoire, batterie |
 | `main.c` | Menu principal |
 
 Prérequis : `arm-none-eabi-gcc` et Node.js (le SDK officiel [`nwlink`](https://www.npmjs.com/package/nwlink) est téléchargé tout seul).
 
 ```sh
 make        # -> output/outils.nwa (à installer depuis my.numworks.com/apps)
-make test   # vérifie les calculs (chimie, triangles, binaire) sur l'ordinateur
+make test   # vérifie les calculs (chimie, maths, binaire, batterie) sur l'ordinateur
 make sim    # -> output/outils.nwb, pour le simulateur officiel :
             #    epsilon.bin --nwb output/outils.nwb
 ```
 
 Le simulateur se compile depuis [le code source d'Epsilon](https://github.com/numworks/epsilon) (`make PLATFORM=linux epsilon.bin`).
+
+Sur la calculatrice, le SDK ne relie pas les fonctions batterie : `outils.c` les appelle directement par appel système (numéros repris d'Epsilon).
 
 Les accents sont écrits normalement dans le code : `ui_str()` les convertit pour la police de la calculatrice, qui dessine « e » + accent combinant.

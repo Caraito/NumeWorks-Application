@@ -20,11 +20,12 @@ __attribute__((used, externally_visible)) void __assert_func(const char *f, int 
 #endif
 
 int main(void) {
-  static const char *const items[] = {"Équilibrer une équation", "Résoudre un triangle", "Binaire",
-                                      "Chronomètre", "Minuteur", "Nombres aléatoires"};
-  static void (*const apps[])(void) = {chimie_app, triangle_app, binaire_app, chrono_app, minuteur_app, aleatoire_app};
+  static const char *const items[] = {"Chimie", "Maths", "Binaire", "Chronomètre", "Minuteur",
+                                      "Nombres aléatoires", "Batterie"};
+  static void (*const apps[])(void) = {chimie_app, maths_app, binaire_app, chrono_app, minuteur_app, aleatoire_app,
+                                       batterie_app};
   for (;;) {
-    int k = ui_menu("Outils", items, 6);
+    int k = ui_menu("Outils", items, 7);
     if (k < 0) return 0;
     apps[k]();
   }
