@@ -2,6 +2,8 @@
 
 # Outils — application pour NumWorks N0110
 
+Fait par **Caraito**.
+
 Une application « boîte à outils » pour le lycée (niveau première), qui s'installe **à côté** du système officiel de la calculatrice :
 
 Le menu principal a quatre parties :
@@ -184,3 +186,7 @@ Le simulateur se compile depuis [le code source d'Epsilon](https://github.com/nu
 Sur la calculatrice, le SDK ne relie pas les fonctions batterie : `outils.c` les appelle directement par appel système (numéros repris d'Epsilon).
 
 Les accents sont écrits normalement dans le code : `ui_str()` les convertit pour la police de la calculatrice, qui dessine « e » + accent combinant.
+
+## Licence
+
+Code sous [licence MIT](LICENSE) © 2026 Caraito : tu peux l'utiliser, le modifier et le partager, à condition de garder la mention de copyright.

@@ -189,6 +189,7 @@ int ui_menu(const char *title, const char *const items[], int n) {
       snprintf(line, sizeof line, "%d  %s", i + 1, items[i]);
       ui_str(10, y + 4, line, true, C_TEXT, bg);
     }
+    if (!strcmp(title, "Outils")) ui_str(10, 220, "Fait par Caraito · licence MIT", false, C_GRAY, C_BG);
     eadk_event_t e = ui_event(-1);
     if (e == eadk_event_up) sel = (sel + n - 1) % n;
     else if (e == eadk_event_down) sel = (sel + 1) % n;
