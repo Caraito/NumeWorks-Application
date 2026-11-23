@@ -62,6 +62,8 @@ bool chimie_explain(const char *reactifs, const char *produits);
 bool avancement_explain(const char *reactifs, const char *produits, const char *quantites);
 double masse_molaire(const char *formule, bool detail); /* < 0 si erreur */
 void masse_explain(const char *formule);
+bool demi_explain(const char *espece, const char *conjuguee);
+bool bilan_explain(const char *reactif1, const char *reactif2);
 bool formule_explain(int idx, char f[5][FIELDLEN]);
 void second_degre_explain(const char *a, const char *b, const char *c);
 void suite_explain(bool geo, const char *u0, const char *raison, const char *n);

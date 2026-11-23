@@ -58,6 +58,33 @@ int main(void) {
   masse_explain("Ca(OH)2");
   expect("masse parenthèses", "M = 74.092 g/mol");
 
+  demi_explain("MnO4^-", "");
+  expect("demi auto", "Couple MnO4^- / Mn^2+");
+  expect("demi MnO4", "MnO4^- + 8 H^+ + 5 e^- = Mn^2+ + 4 H2O");
+  demi_explain("Fe^2+", "");
+  expect("demi 2 couples", "Fe^2+ appartient à 2 couples");
+  expect("demi Fe3", "Fe^3+ + e^- = Fe^2+");
+  expect("demi Fe", "Fe^2+ + 2 e^- = Fe");
+  demi_explain("O2", "H2O");
+  expect("demi manuel", "O2 + 4 H^+ + 4 e^- = 2 H2O");
+  demi_explain("Zn", "Zn^2+");
+  expect("demi manuel inversé", "Zn^2+ + 2 e^- = Zn");
+  demi_explain("CH3CH2OH", "");
+  expect("demi éthanol", "CH3COOH + 4 H^+ + 4 e^- = CH3CH2OH + H2O");
+  demi_explain("Xe", "");
+  expect("demi inconnu", "pas de couple");
+  bilan_explain("MnO4^-", "Fe^2+");
+  expect("bilan oxydant", "Oxydant : MnO4^-");
+  expect("bilan facteur", "(x 5)");
+  expect("bilan", "MnO4^- + 5 Fe^2+ + 8 H^+");
+  bilan_explain("Fe^2+", "H2O2");
+  expect("bilan H2O2", "Oxydant : H2O2");
+  expect("bilan H2O2 éq", "H2O2 + 2 Fe^2+ + 2 H^+");
+  bilan_explain("Cu", "Ag^+");
+  expect("bilan métaux", "2 Ag^+ + Cu \xe2\x86\x92 2 Ag + Cu^2+");
+  bilan_explain("I^-", "S2O3^2-");
+  expect("bilan impossible", "Je ne trouve pas");
+
   avancement_explain("CH4+O2", "CO2+H2O", "2, 3");
   expect("limitant", "Réactif limitant : O2");
   expect("xmax", "x max = 1.5 mol");

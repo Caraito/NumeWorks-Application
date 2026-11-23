@@ -9,7 +9,7 @@ Le menu principal a quatre parties :
 | Partie | Contenu |
 |---|---|
 | **Maths** | **Second degré** avec étapes (Δ, racines exactes comme `(-1 - √17)/4`, formes factorisée et canonique, sommet, signe) ; **suites** arithmétiques et géométriques (terme général, somme, variation). |
-| **Physique-chimie** | **Chimie** : équilibrage d'équations (parenthèses, crochets, hydrates, ions, électrons), **tableau d'avancement** (réactif limitant, x max, état final), **masse molaire** d'une formule, **quantité de matière** (n = m/M, C = n/V, Cm = m/V, dilution). **Physique** : **formules à trous**, on remplit toutes les cases sauf une et l'inconnue est calculée (mécanique, électricité, ondes et lumière, matière et fluides : 20 formules). |
+| **Physique-chimie** | **Chimie** : équilibrage d'équations (parenthèses, crochets, hydrates, ions, électrons), **oxydoréduction** (couple trouvé automatiquement, demi-équations, équation bilan), **tableau d'avancement** (réactif limitant, x max, état final), **masse molaire** d'une formule, **quantité de matière** (n = m/M, C = n/V, Cm = m/V, dilution). **Physique** : **formules à trous**, on remplit toutes les cases sauf une et l'inconnue est calculée (mécanique, électricité, ondes et lumière, matière et fluides : 20 formules). |
 | **NSI** | Conversions de bases avec étapes, addition / soustraction posées avec retenues, complément à 2, nombres à virgule IEEE 754, entraînement noté. |
 | **Utilitaires** | **Chronomètre** avec tours, **minuteur** avec alerte visuelle, **nombres aléatoires** (intervalle, sans doublon, dés, pile ou face, mélange), **batterie** (pourcentage estimé, état de charge, temps restant mesuré). |
 
@@ -115,7 +115,14 @@ Les symboles commencent par une majuscule (`Co` = cobalt, `CO` = monoxyde de car
 
 **Quantité de matière** : choisir la relation, remplir toutes les cases **sauf celle à calculer** (laissée vide). Dans `n = m / M`, la case M accepte aussi une formule (`H2O`). Pour la dilution, V1 et V2 sont dans la même unité.
 
+**Oxydoréduction** (milieu acide) :
+- **Demi-équation** : taper une espèce (`MnO4^-`, `Fe^2+`, `CH3CH2OH`…) et laisser « Conjuguée » vide : le couple est trouvé dans la table et la demi-équation est équilibrée avec H⁺, H₂O et e⁻ (`MnO4^- + 8 H^+ + 5 e^- = Mn^2+ + 4 H2O`). Si l'espèce appartient à plusieurs couples (Fe²⁺, H₂O₂), toutes les demi-équations sont données. Pour un couple absent de la table, taper aussi l'espèce conjuguée.
+- **Équation bilan** : taper les deux réactifs. L'outil identifie l'oxydant et le réducteur (si plusieurs couples sont possibles, il choisit la réaction favorisée d'après les potentiels standard), écrit les demi-équations avec leurs coefficients puis l'équation bilan.
+- **Couples connus** : les 30 couples de la table, avec leur potentiel standard E°.
+
 #### Physique
+
+Dans Physique-chimie, choisir **Formules de physique**, puis le thème.
 
 Choisir un thème, puis une formule. **Remplir toutes les cases sauf celle à calculer** (laissée vide), puis EXE.
 - Les unités sont indiquées à côté de chaque case (unités du système international, sauf mention contraire).

@@ -373,22 +373,193 @@ void masse_explain(const char *formule) {
   outf("M = %s g/mol", t);
 }
 
+/* ---------- Oxydoréduction (milieu acide) ---------- */
+
+typedef struct {
+  const char *ox, *red;
+  float e0; /* potentiel standard (V), sert à choisir le sens de la réaction */
+} couple_t;
+
+static const couple_t COUPLES[] = {
+    {"H2O2", "H2O", 1.78},  {"HClO", "Cl2", 1.63},    {"Ce^4+", "Ce^3+", 1.61},    {"MnO4^-", "Mn^2+", 1.51},
+    {"Au^3+", "Au", 1.50},  {"Cl2", "Cl^-", 1.36},     {"Cr2O7^2-", "Cr^3+", 1.33}, {"O2", "H2O", 1.23},
+    {"IO3^-", "I2", 1.19},  {"Br2", "Br^-", 1.07},     {"NO3^-", "NO", 0.96},    {"Hg^2+", "Hg", 0.85},
+    {"Ag^+", "Ag", 0.80},   {"Fe^3+", "Fe^2+", 0.77},  {"O2", "H2O2", 0.70},     {"I2", "I^-", 0.54},
+    {"Cu^2+", "Cu", 0.34},  {"CH3COOH", "CH3CH2OH", 0.19}, {"SO4^2-", "SO2", 0.17}, {"S4O6^2-", "S2O3^2-", 0.08},
+    {"H^+", "H2", 0.00},    {"Pb^2+", "Pb", -0.13},    {"Sn^2+", "Sn", -0.14},   {"Ni^2+", "Ni", -0.25},
+    {"Fe^2+", "Fe", -0.44}, {"CO2", "H2C2O4", -0.49},  {"Zn^2+", "Zn", -0.76},   {"Al^3+", "Al", -1.66},
+    {"Mg^2+", "Mg", -2.37}, {"Na^+", "Na", -2.71},
+};
+#define NCOUPLES (int)(sizeof COUPLES / sizeof COUPLES[0])
+
+/* Composition « canonique » d'une espèce (éléments triés + charge) : CH3COOH == C2H4O2. */
+static bool canon(const char *f, char *d) {
+  nel = nsp = 0;
+  err[0] = 0;
+  if (!side(f) || nsp != 1) return false;
+  int ord[MAXEL];
+  for (int i = 0; i < nel; i++) ord[i] = i;
+  for (int i = 1; i < nel; i++)
+    for (int j = i; j > 0 && strcmp(el[ord[j - 1]], el[ord[j]]) > 0; j--) { int t = ord[j]; ord[j] = ord[j - 1]; ord[j - 1] = t; }
+  d[0] = 0;
+  for (int i = 0; i < nel; i++)
+    if (cnt[0][ord[i]]) sprintf(d + strlen(d), "%s%d", el[ord[i]], cnt[0][ord[i]]);
+  sprintf(d + strlen(d), "^%d", charge[0]);
+  return true;
+}
+
+static bool same(const char *a, const char *b) {
+  char ka[96], kb[96];
+  return canon(a, ka) && canon(b, kb) && !strcmp(ka, kb);
+}
+
+/* Équilibre gauche -> droite en ajoutant H+ / H2O si besoin (milieu acide). */
+static bool balance_acid(const char *left, const char *right, const char *tail) {
+  static const char *const extra[][2] = {{"", ""}, {"+H^+", "+H2O"}, {"+H2O", "+H^+"}, {"+H^+", ""},
+                                         {"", "+H^+"}, {"+H2O", ""}, {"", "+H2O"}};
+  for (unsigned i = 0; i < sizeof extra / sizeof extra[0]; i++) {
+    char l[3 * FIELDLEN], r[3 * FIELDLEN];
+    snprintf(l, sizeof l, "%s%s%s", left, extra[i][0], tail); /* tail : « +e^- » en dernier */
+    snprintf(r, sizeof r, "%s%s", right, extra[i][1]);
+    if (parse_balance(l, r)) return true;
+  }
+  return false;
+}
+
+/* Demi-équation ox + n e- = red ; renvoie n (0 si échec). */
+static int half(const char *ox, const char *red, char *line, bool reversed) {
+  if (!balance_acid(ox, red, "+e^-")) return 0;
+  char a[8 * FIELDLEN], b[8 * FIELDLEN];
+  print_side(a, 0, nreac);
+  print_side(b, nreac, nsp);
+  sprintf(line, "%s = %s", reversed ? b : a, reversed ? a : b);
+  return (int)coef[nreac - 1]; /* e^- est la dernière espèce de gauche */
+}
+
+static void print_line(const char *line) { /* coupe avant le « = » si trop long */
+  const char *eq = strstr(line, " = ");
+  if ((int)strlen(line) <= COLS || !eq) { outf("  %s", line); return; }
+  outf("  %.*s", (int)(eq - line), line);
+  outf("  %s", eq + 1);
+}
+
+bool demi_explain(const char *a, const char *b) {
+  out_clear();
+  char line[16 * FIELDLEN];
+  bool any_b = false;
+  for (const char *c = b; *c; c++) any_b |= *c != ' ';
+  if (any_b) {
+    bool ab = half(a, b, line, false) > 0;
+    if (!ab && !half(b, a, line, false)) { out_clear(); print_error(); return false; }
+    outf("Couple %s / %s", ab ? a : b, ab ? b : a);
+    outf("");
+    print_line(line);
+    return true;
+  }
+  int found = 0;
+  for (int i = 0; i < NCOUPLES; i++) {
+    bool is_ox = same(a, COUPLES[i].ox), is_red = !is_ox && same(a, COUPLES[i].red);
+    if (!is_ox && !is_red) continue;
+    if (!half(COUPLES[i].ox, COUPLES[i].red, line, false)) continue;
+    if (found++) outf("");
+    outf("Couple %s / %s", COUPLES[i].ox, COUPLES[i].red);
+    outf("(%s y est %s)", a, is_ox ? "l'oxydant" : "le réducteur");
+    print_line(line);
+  }
+  if (!found) {
+    if (!canon(a, line)) { out_clear(); print_error(); return false; }
+    outf("Je ne connais pas de couple pour %s.", a);
+    outf("Tape aussi l'espèce conjuguée (ex : Fe^3+ et Fe^2+).");
+    return false;
+  }
+  if (found > 1) { outf(""); outf("%s appartient à %d couples.", a, found); }
+  return true;
+}
+
+bool bilan_explain(const char *r1, const char *r2) {
+  out_clear();
+  const char *rs[2] = {r1, r2};
+  int bo = -1, br = -1, who = 0; /* couple de l'oxydant, couple du réducteur, réactif oxydant */
+  for (int w = 0; w < 2; w++)
+    for (int i = 0; i < NCOUPLES; i++) {
+      if (!same(rs[w], COUPLES[i].ox)) continue;
+      for (int j = 0; j < NCOUPLES; j++)
+        if (j != i && same(rs[1 - w], COUPLES[j].red) &&
+            (bo < 0 || COUPLES[i].e0 - COUPLES[j].e0 > COUPLES[bo].e0 - COUPLES[br].e0)) {
+          bo = i; br = j; who = w;
+        }
+    }
+  if (bo < 0) {
+    char k[96];
+    if (!canon(r1, k) || !canon(r2, k)) { out_clear(); print_error(); return false; }
+    out_clear();
+    outf("Je ne trouve pas de couple où l'un est l'oxydant et l'autre le réducteur.");
+    outf("Voir « Couples connus ».");
+    return false;
+  }
+  const couple_t *O = &COUPLES[bo], *R = &COUPLES[br];
+  char l1[16 * FIELDLEN], l2[16 * FIELDLEN];
+  int n1 = half(O->ox, O->red, l1, false), n2 = half(R->ox, R->red, l2, true);
+  int L = n1 * n2, g = n1, h = n2;
+  while (h) { int t = g % h; g = h; h = t; }
+  L /= g;
+  outf("Oxydant : %s (couple %s / %s)", rs[who], O->ox, O->red);
+  outf("Réducteur : %s (couple %s / %s)", rs[1 - who], R->ox, R->red);
+  outf("");
+  outf("Demi-équations :");
+  print_line(l1);
+  if (L / n1 > 1) outf("    (x %d)", L / n1);
+  print_line(l2);
+  if (L / n2 > 1) outf("    (x %d)", L / n2);
+  char left[2 * FIELDLEN], right[2 * FIELDLEN];
+  snprintf(left, sizeof left, "%s+%s", O->ox, R->red);
+  snprintf(right, sizeof right, "%s+%s", O->red, R->ox);
+  outf("");
+  if (!balance_acid(left, right, "")) { outf("Équation bilan introuvable."); return false; }
+  print_equation();
+  outf("(les %d électrons échangés s'éliminent)", L);
+  if (O->e0 < R->e0) outf("Attention : d'après les potentiels, cette réaction n'est pas favorisée.");
+  return true;
+}
+
+static void couples_list(void) {
+  out_clear();
+  outf("Couples oxydant / réducteur (E\xc2\xb0 en V) :");
+  for (int i = 0; i < NCOUPLES; i++) {
+    char c[64];
+    snprintf(c, sizeof c, "%s / %s", COUPLES[i].ox, COUPLES[i].red);
+    outf("  %-24s %+.2f", c, COUPLES[i].e0);
+  }
+}
+
 void physchim_app(void) {
-  static const char *const menu[] = {"Équilibrer une équation", "Tableau d'avancement", "Masse molaire",
-                                     "Quantité de matière", "Mécanique", "Électricité", "Ondes et lumière",
-                                     "Matière et fluides"};
+  static const char *const menu[] = {"Équilibrer une équation", "Oxydoréduction", "Tableau d'avancement",
+                                     "Masse molaire", "Quantité de matière", "Formules de physique"};
+  static const char *const redox[] = {"Demi-équation", "Équation bilan", "Couples connus"};
+  static const char *const phys[] = {"Mécanique", "Électricité", "Ondes et lumière", "Matière et fluides"};
   static const char *const l_eq[] = {"Réactifs", "Produits", "n init (mol)"};
   static const char *const l_mm[] = {"Formule"};
+  static const char *const l_demi[] = {"Espèce", "Conjuguée"};
+  static const char *const l_bil[] = {"Réactif 1", "Réactif 2"};
   static char eq[3][FIELDLEN] = {"CH4+O2", "CO2+H2O", "2, 3"};
   static char mm[1][FIELDLEN] = {"C6H12O6"};
+  static char dm[2][FIELDLEN] = {"MnO4^-", ""};
+  static char bl[2][FIELDLEN] = {"MnO4^-", "Fe^2+"};
   for (;;) {
-    int k = ui_menu("Physique-chimie", menu, 8);
+    int k = ui_menu("Physique-chimie", menu, 6), r;
     if (k < 0) return;
     switch (k) {
       case 0: while (ui_form("Équilibrer", l_eq, eq, 2)) { chimie_explain(eq[0], eq[1]); ui_text("Équilibrage", ""); } break;
-      case 1: while (ui_form("Avancement", l_eq, eq, 3)) { avancement_explain(eq[0], eq[1], eq[2]); ui_text("Avancement", ""); } break;
-      case 2: while (ui_form("Masse molaire", l_mm, mm, 1)) { masse_explain(mm[0]); ui_text("Masse molaire", ""); } break;
-      default: formules_menu(k - 3); break; /* 3 : quantité de matière, 4+ : physique */
+      case 1:
+        if ((r = ui_menu("Oxydoréduction", redox, 3)) < 0) break;
+        if (r == 0) while (ui_form("Demi-équation", l_demi, dm, 2)) { demi_explain(dm[0], dm[1]); ui_text("Demi-équation", ""); }
+        else if (r == 1) while (ui_form("Équation bilan", l_bil, bl, 2)) { bilan_explain(bl[0], bl[1]); ui_text("Équation bilan", ""); }
+        else { couples_list(); ui_text("Couples connus", ""); }
+        break;
+      case 2: while (ui_form("Avancement", l_eq, eq, 3)) { avancement_explain(eq[0], eq[1], eq[2]); ui_text("Avancement", ""); } break;
+      case 3: while (ui_form("Masse molaire", l_mm, mm, 1)) { masse_explain(mm[0]); ui_text("Masse molaire", ""); } break;
+      case 4: formules_menu(0); break;
+      case 5: if ((r = ui_menu("Formules de physique", phys, 4)) >= 0) formules_menu(r + 1); break;
     }
   }
 }
