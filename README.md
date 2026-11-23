@@ -10,7 +10,7 @@ Une application « boîte à outils » pour le lycée (niveau première), qui s'
 | **Chronomètre** | Avec temps intermédiaires (tours). |
 | **Minuteur** | Alerte visuelle (écran qui clignote) à la fin. |
 | **Nombres aléatoires** | Entiers dans un intervalle, tirage sans doublon, dés, pile ou face, mélange de 1 à n. |
-| **Batterie** | Pourcentage estimé, tension, état de charge, temps restant approximatif, baisse depuis l'ouverture de l'écran. |
+| **Batterie** | Pourcentage estimé, tension, état de charge, temps restant mesuré, baisse depuis l'ouverture de l'écran. |
 
 ![Menu](docs/menu.png) ![Chimie](docs/chimie.png) ![Avancement](docs/avancement.png)
 ![Quantité de matière](docs/quantite.png) ![Second degré](docs/second_degre.png) ![Binaire](docs/binaire.png)
@@ -124,8 +124,8 @@ Les symboles commencent par une majuscule (`Co` = cobalt, `CO` = monoxyde de car
 
 La calculatrice ne mesure pas sa consommation : tout est **estimé** à partir de la tension de la batterie.
 - **Pourcentage** : estimé d'après la tension (courbe typique d'une batterie lithium). Il est faussé pendant la charge.
-- **Temps restant** : pourcentage × autonomie d'une charge complète, supposée de **20 h** d'utilisation. À ajuster dans `src/outils.c` (`AUTONOMIE_H`) selon l'autonomie réelle constatée.
-- **Depuis l'ouverture** : baisse du pourcentage depuis l'ouverture de l'écran ; après 10 minutes, un « rythme mesuré » s'affiche. Ce n'est significatif que si on laisse l'écran ouvert longtemps.
+- **Depuis l'ouverture** : baisse du pourcentage depuis l'ouverture de l'écran.
+- **Temps restant mesuré** : calculé au rythme de baisse constaté, seulement si l'écran reste ouvert au moins 10 minutes et que le pourcentage a baissé. Plus on attend, plus c'est fiable.
 - Pas d'historique sur plusieurs jours : une application externe ne peut pas garder de données entre deux ouvertures.
 
 ### Chronomètre et minuteur

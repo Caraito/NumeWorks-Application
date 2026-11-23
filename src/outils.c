@@ -248,8 +248,7 @@ void aleatoire_app(void) {
 
 /* ---------- Batterie ---------- */
 
-/* ponytail: valeurs « hardware » approximatives, à ajuster sur la vraie calculatrice. */
-#define AUTONOMIE_H 20 /* heures d'utilisation pour une charge complète (supposé) */
+/* ponytail: courbe tension -> % approximative, à ajuster sur la vraie calculatrice. */
 static const float VOLT[][2] = {{4.20f, 100}, {4.10f, 90}, {4.00f, 80}, {3.93f, 70}, {3.87f, 60}, {3.82f, 50},
                                 {3.79f, 40},  {3.77f, 30}, {3.74f, 20}, {3.70f, 10}, {3.60f, 5},  {3.30f, 0}};
 
@@ -304,10 +303,11 @@ void batterie_app(void) {
     outf("Estimation d'après la tension : %s V", v);
     outf("État : %s", charging ? "en charge" : "sur batterie");
     if (charging) outf("En charge : la tension (et le %%) sont faussés.");
-    else outf("Temps restant : ~%d h (sur %d h par charge)", pct * AUTONOMIE_H / 100, AUTONOMIE_H);
     outf("Depuis l'ouverture : %lu min, %+d %%", (unsigned long)min, pct - p0);
-    if (!charging && min >= 10 && p0 > pct)
-      outf("Rythme mesuré : environ %lu h pour 100 %%", (unsigned long)(min * 100 / (p0 - pct) / 60));
+    if (!charging && min >= 10 && p0 > pct) /* au rythme constaté depuis l'ouverture */
+      outf("Temps restant mesuré : environ %lu h", (unsigned long)(pct * min / (p0 - pct) / 60));
+    else if (!charging)
+      outf("Temps restant : laisse l'écran ouvert 10 min");
     eadk_display_push_rect_uniform((eadk_rect_t){0, 96, 320, 120}, C_BG);
     for (int i = 0; i < nout; i++) ui_str(8, 100 + i * 17, out[i], false, C_TEXT, C_BG);
 
