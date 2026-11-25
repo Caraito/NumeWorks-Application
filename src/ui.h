@@ -32,7 +32,8 @@ bool out_has(const char *needle); /* pour les tests */
 void ui_clear(void);
 void ui_header(const char *title, const char *hint);
 void ui_str(int x, int y, const char *s, bool large, eadk_color_t fg, eadk_color_t bg);
-eadk_event_t ui_event(int32_t timeout_ms); /* 0xFFFF si rien */
+#define EV_REDRAW 0xFFFE                     /* écran perdu (extinction) : tout redessiner */
+eadk_event_t ui_event(int32_t timeout_ms); /* 0xFFFF si rien ; les touches sont < 216 */
 
 int ui_menu(const char *title, const char *const items[], int n); /* -1 = retour */
 bool ui_form(const char *title, const char *const labels[], char bufs[][FIELDLEN], int n);

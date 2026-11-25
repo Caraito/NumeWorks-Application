@@ -8,6 +8,8 @@
 /* Bouchons de l'API calculatrice (rien à afficher pendant les tests). */
 void eadk_display_push_rect_uniform(eadk_rect_t r, eadk_color_t c) {}
 void eadk_display_draw_string(const char *t, eadk_point_t p, bool l, eadk_color_t a, eadk_color_t b) {}
+static eadk_color_t pixel; /* le pixel relu par ui_event pour détecter un écran perdu */
+void eadk_display_pull_rect(eadk_rect_t r, eadk_color_t *p) { *p = pixel; }
 eadk_event_t eadk_event_get(int32_t *t) { return eadk_event_back; }
 uint32_t eadk_random(void) { return rand(); }
 void eadk_backlight_set_brightness(uint8_t b) {}
@@ -209,6 +211,13 @@ int main(void) {
   ieee_explain("-6.75");
   expect("IEEE -6.75", "Hexadécimal : C0D80000");
   expect("IEEE exact", "Représentation exacte");
+
+  /* Extinction/rallumage : le contenu de l'écran change sous nos pieds -> EV_REDRAW. */
+  pixel = C_HEAD;
+  ui_header("Test", "");
+  if (ui_event(0) == EV_REDRAW) { fails++; printf("ÉCHEC écran intact pris pour perdu\n"); }
+  pixel = 0x1234;
+  if (ui_event(0) != EV_REDRAW) { fails++; printf("ÉCHEC écran perdu non détecté\n"); }
 
   printf(fails ? "%d test(s) en échec\n" : "Tous les tests passent.\n", fails);
   return fails != 0;

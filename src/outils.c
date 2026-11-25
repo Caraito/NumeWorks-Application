@@ -42,7 +42,8 @@ void chrono_app(void) {
     }
     eadk_event_t e = ui_event(run ? 20 : -1);
     if (e == eadk_event_back) return;
-    if (e == eadk_event_ok) {
+    if (e == EV_REDRAW) full = true;
+    else if (e == eadk_event_ok) {
       if (run) acc = ms;
       else start = eadk_timing_millis();
       run = !run;
@@ -68,7 +69,7 @@ static void alert(void) {
     ui_str(90, 96, "Temps écoulé !", true, fg, bg);
     ui_str(86, 130, "Appuie sur une touche", false, fg, bg);
     eadk_backlight_set_brightness(i % 2 ? 255 : br);
-    if (ui_event(400) != 0xFFFF) break;
+    if (ui_event(400) < 216) break; /* une touche (pas EV_REDRAW : cet écran n'a pas de bandeau) */
   }
   eadk_backlight_set_brightness(br);
 }
@@ -85,12 +86,16 @@ void minuteur_app(void) {
     }
     uint32_t total = (uint32_t)(m * 60 + s) * 1000, remaining = total, shown = UINT32_MAX;
     uint64_t end = eadk_timing_millis() + total;
-    bool run = true;
-    ui_clear();
-    ui_header("Minuteur", "");
-    ui_str(8, 206, "OK : pause / reprise", false, C_GRAY, C_BG);
-    ui_str(8, 222, "Effacer : recommencer    Retour : arrêter", false, C_GRAY, C_BG);
+    bool run = true, full = true;
     for (;;) {
+      if (full) {
+        ui_clear();
+        ui_header("Minuteur", "");
+        ui_str(8, 206, "OK : pause / reprise", false, C_GRAY, C_BG);
+        ui_str(8, 222, "Effacer : recommencer    Retour : arrêter", false, C_GRAY, C_BG);
+        shown = UINT32_MAX;
+        full = false;
+      }
       uint64_t now = eadk_timing_millis();
       uint32_t rem = run ? (end > now ? (uint32_t)(end - now) : 0) : remaining;
       if (rem == 0) { alert(); break; }
@@ -106,7 +111,8 @@ void minuteur_app(void) {
       }
       eadk_event_t e = ui_event(run ? 50 : -1);
       if (e == eadk_event_back || g_quit) break;
-      if (e == eadk_event_ok) {
+      if (e == EV_REDRAW) full = true;
+      else if (e == eadk_event_ok) {
         if (run) remaining = rem;
         else end = now + remaining;
         run = !run;
@@ -280,10 +286,13 @@ void batterie_app(void) {
   uint64_t t0 = eadk_timing_millis();
   float avg = eadk_battery_voltage();
   int p0 = -1;
-  ui_clear();
-  ui_header("Batterie", "");
-  ui_str(8, 222, "Mise à jour chaque seconde", false, C_GRAY, C_BG);
-  for (;;) {
+  for (bool full = true;;) {
+    if (full) {
+      ui_clear();
+      ui_header("Batterie", "");
+      ui_str(8, 222, "Mise à jour chaque seconde", false, C_GRAY, C_BG);
+      full = false;
+    }
     avg = 0.9f * avg + 0.1f * eadk_battery_voltage(); /* lissage : la tension bouge un peu */
     int pct = pct_from_voltage(avg);
     bool charging = eadk_battery_is_charging();
@@ -313,6 +322,7 @@ void batterie_app(void) {
 
     eadk_event_t e = ui_event(1000);
     if (e == eadk_event_back || g_quit) return;
+    full = e == EV_REDRAW;
   }
 }
 
