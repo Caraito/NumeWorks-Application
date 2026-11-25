@@ -1,6 +1,8 @@
 <img src="docs/logo.png" width="110" align="right" alt="Logo">
 
-# Outils — application pour NumWorks N0110
+# Outils — application pour NumWorks N0120
+
+> **Branche `v0120`** : version compilée pour la **N0120** (les calculs en `double` sont faits par le processeur, donc plus rapides). Elle **ne fonctionne pas sur N0110/N0115** : pour celles-ci, prendre `release/outils.nwa` de la branche principale.
 
 Fait par **Caraito**.
 

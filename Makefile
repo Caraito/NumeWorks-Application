@@ -1,4 +1,5 @@
-# make        -> output/outils.nwa  (à installer depuis https://my.numworks.com/apps)
+# make        -> output/outils.nwa pour N0120 (à installer depuis https://my.numworks.com/apps)
+# -mfpu=fpv5-d16 : la N0120 (STM32H725) calcule les double en matériel ; ne tourne PAS sur N0110.
 # make test   -> vérifie les calculs sur l'ordinateur
 # make sim    -> output/outils.nwb  (simulateur Epsilon : epsilon.bin --nwb output/outils.nwb)
 NWLINK = npx --yes -- nwlink@1.0.0
@@ -7,7 +8,7 @@ CFLAGS = -std=c99 -Wall -Wextra -Wno-unused-parameter -Wno-format-zero-length -W
 SIM_CFLAGS = $(shell $(NWLINK) eadk-cflags-simulator)
 
 output/outils.nwa: $(SRC) src/ui.h output/icon.o
-	arm-none-eabi-gcc $(CFLAGS) $(shell $(NWLINK) eadk-cflags-device) -Os \
+	arm-none-eabi-gcc $(CFLAGS) $(shell $(NWLINK) eadk-cflags-device) -mfpu=fpv5-d16 -Os \
 	  -fdata-sections -ffunction-sections -flto -fno-fat-lto-objects -fwhole-program -fvisibility=internal \
 	  $(SRC) output/icon.o $(shell $(NWLINK) eadk-ldflags-device) --specs=nano.specs -Wl,-u,_printf_float \
 	  -Wl,-e,main -Wl,-u,eadk_app_name -Wl,-u,eadk_app_icon -Wl,-u,eadk_api_level -Wl,--gc-sections \
