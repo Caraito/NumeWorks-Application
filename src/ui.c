@@ -102,8 +102,20 @@ void ui_str(int x, int y, const char *s, bool large, eadk_color_t fg, eadk_color
 
 void ui_clear(void) { eadk_display_push_rect_uniform(eadk_screen_rect, C_BG); }
 
+/* Après une extinction (shift + ON/OFF), l'écran est réinitialisé et son contenu perdu :
+ * il affiche du bruit. On relit un pixel du bandeau ; s'il a changé, tout est à redessiner.
+ * La valeur de référence est relue (et non supposée égale à C_HEAD) : la relecture peut arrondir. */
+static eadk_color_t mark;
+
+static eadk_color_t read_mark(void) {
+  eadk_color_t c = 0;
+  eadk_display_pull_rect((eadk_rect_t){0, 0, 1, 1}, &c);
+  return c;
+}
+
 void ui_header(const char *title, const char *hint) {
   eadk_display_push_rect_uniform((eadk_rect_t){0, 0, 320, 22}, C_HEAD);
+  mark = read_mark();
   ui_str(6, 2, title, true, eadk_color_white, C_HEAD);
   int tw = 0, w = 0;
   for (const char *p = title; *p; p++) tw += (*p & 0xC0) != 0x80;
@@ -114,15 +126,12 @@ void ui_header(const char *title, const char *hint) {
 eadk_event_t ui_event(int32_t timeout_ms) {
   if (g_quit) return eadk_event_back;
   /* Les identifiants >= 216 sont des événements spéciaux (aucune touche). */
-  if (timeout_ms >= 0) {
-    int32_t t = timeout_ms;
-    eadk_event_t e = eadk_event_get(&t);
-    return e >= 216 ? 0xFFFF : e;
-  }
   for (;;) {
-    int32_t t = 100000;
+    int32_t t = timeout_ms >= 0 && timeout_ms < 500 ? timeout_ms : 500; /* revérifie l'écran 2 fois/s */
     eadk_event_t e = eadk_event_get(&t);
+    if (read_mark() != mark) return EV_REDRAW;
     if (e < 216) return e;
+    if (timeout_ms >= 0 && (timeout_ms -= 500) <= 0) return 0xFFFF;
   }
 }
 
