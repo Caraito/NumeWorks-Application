@@ -68,6 +68,7 @@ bool bilan_explain(const char *reactif1, const char *reactif2);
 bool formule_explain(int idx, char f[5][FIELDLEN]);
 void second_degre_explain(const char *a, const char *b, const char *c);
 void suite_explain(bool geo, const char *u0, const char *raison, const char *n);
+void trigo_table(void);
 int pct_from_voltage(float v);
 void bin_convert_explain(const char *s, int base);
 void bin_op_explain(const char *a, const char *b, bool sub);

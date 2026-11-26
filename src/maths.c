@@ -1,4 +1,4 @@
-/* Maths : second degré (avec valeurs exactes quand c'est possible) et suites. */
+/* Maths : second degré (avec valeurs exactes quand c'est possible), suites, cercle trigonométrique. */
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +10,11 @@
 #define SQRT "\xe2\x88\x9a"
 #define INF "\xe2\x88\x9e"
 #define TIMES "\xc3\x97"
+#define PI "\xcf\x80"
+#define DEG "\xc2\xb0"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 static long gcdl(long a, long b) {
   if (a < 0) a = -a;
@@ -235,17 +240,132 @@ void suite_explain(bool geo, const char *su0, const char *sr, const char *sn) {
   outf("  %s", line);
 }
 
+/* ---------- Cercle trigonométrique ---------- */
+
+static const int trig_deg[16] = {0, 30, 45, 60, 90, 120, 135, 150, 180, 210, 225, 240, 270, 300, 315, 330};
+static const char *const trig_rad[16] = {"0",      PI "/6",      PI "/4",      PI "/3",      PI "/2",      "2" PI "/3",
+                                         "3" PI "/4", "5" PI "/6", PI,          "7" PI "/6", "5" PI "/4", "4" PI "/3",
+                                         "3" PI "/2", "5" PI "/3", "7" PI "/4", "11" PI "/6"};
+
+static double trig_val(int k, bool sinus) { /* cos ou sin de l'angle k, 0 exact au lieu de 6e-17 */
+  double a = trig_deg[k] * M_PI / 180, v = sinus ? sin(a) : cos(a);
+  return fabs(v) < 1e-9 ? 0 : v;
+}
+
+static const char *exact(double v) { /* valeur exacte d'un cos / sin remarquable */
+  static const char *const s[] = {"0", "1/2", SQRT "2/2", SQRT "3/2", "1", "-1/2", "-" SQRT "2/2", "-" SQRT "3/2", "-1"};
+  static const double x[] = {0, 0.5, 0.70710678, 0.86602540, 1};
+  for (int i = 0; i < 5; i++)
+    if (fabs(fabs(v) - x[i]) < 1e-6) return s[v < 0 && i ? i + 4 : i];
+  return "?";
+}
+
+static int ulen(const char *s) {
+  int n = 0;
+  for (; *s; s++) n += (*s & 0xC0) != 0x80;
+  return n;
+}
+
+static void pad(char *d, const char *s, int w) { /* ajoute s puis des espaces jusqu'à w caractères */
+  strcat(d, s);
+  for (int n = ulen(s); n < w; n++) strcat(d, " ");
+}
+
+void trigo_table(void) {
+  out_clear();
+  char l[LINELEN] = "";
+  pad(l, "Degrés", 8); pad(l, "Radians", 9); pad(l, "cos", 9); strcat(l, "sin");
+  outf("%s", l);
+  for (int k = 0; k < 16; k++) {
+    char d[8];
+    sprintf(d, "%d" DEG, trig_deg[k]);
+    l[0] = 0;
+    pad(l, d, 8); pad(l, trig_rad[k], 9); pad(l, exact(trig_val(k, false)), 9); strcat(l, exact(trig_val(k, true)));
+    outf("%s", l);
+  }
+  outf("");
+  outf("À retenir, de 0 à " PI "/2 :");
+  outf("  cos : 1, " SQRT "3/2, " SQRT "2/2, 1/2, 0");
+  outf("  sin : 0, 1/2, " SQRT "2/2, " SQRT "3/2, 1");
+  outf("Radians = degrés " TIMES " " PI " / 180");
+  outf("cos" "Â²" "x + sin" "Â²" "x = 1");
+  outf("");
+  outf("Angles associés :");
+  outf("  cos(-x) = cos x        sin(-x) = -sin x");
+  outf("  cos(" PI " - x) = -cos x    sin(" PI " - x) = sin x");
+  outf("  cos(" PI " + x) = -cos x    sin(" PI " + x) = -sin x");
+  outf("  cos(" PI "/2 - x) = sin x   sin(" PI "/2 - x) = cos x");
+}
+
+static void dot(int x, int y, int s, eadk_color_t c) {
+  eadk_display_push_rect_uniform((eadk_rect_t){x - s / 2, y - s / 2, s, s}, c);
+}
+
+static void trigo_app(void) {
+  enum { CX = 100, CY = 130, R = 72, RL = 94 }; /* centre, rayon, rayon des étiquettes */
+  const eadk_color_t blue = RGB(30, 100, 220);
+  static int k = 1;
+  for (;;) {
+    ui_clear();
+    ui_header("Cercle trigo", "OK : tableau");
+    eadk_display_push_rect_uniform((eadk_rect_t){CX - R - 8, CY, 2 * R + 16, 1}, C_GRAY);
+    eadk_display_push_rect_uniform((eadk_rect_t){CX, CY - R - 8, 1, 2 * R + 16}, C_GRAY);
+    for (int i = 0; i < 720; i++) dot(CX + lround(R * cos(i * M_PI / 360)), CY - lround(R * sin(i * M_PI / 360)), 2, C_TEXT);
+
+    double c = trig_val(k, false), s = trig_val(k, true);
+    int px = CX + lround(R * c), py = CY - lround(R * s);
+    for (int y = py < CY ? py : CY; y <= (py < CY ? CY : py); y++) if (y / 3 % 2) dot(px, y, 1, C_GRAY); /* pointillés */
+    for (int x = px < CX ? px : CX; x <= (px < CX ? CX : px); x++) if (x / 3 % 2) dot(x, py, 1, C_GRAY);
+    eadk_display_push_rect_uniform((eadk_rect_t){px < CX ? px : CX, CY - 1, abs(px - CX) + 1, 3}, blue); /* cos */
+    eadk_display_push_rect_uniform((eadk_rect_t){CX - 1, py < CY ? py : CY, 3, abs(py - CY) + 1}, C_BAD); /* sin */
+    for (int j = 0; j <= R; j++) dot(CX + lround(j * c), CY - lround(j * s), 2, C_HEAD);
+
+    for (int i = 0; i < 16; i++) {
+      double ci = trig_val(i, false), si = trig_val(i, true);
+      dot(CX + lround(R * ci), CY - lround(R * si), i == k ? 7 : 5, i == k ? C_HEAD : C_GRAY);
+      int w = 7 * ulen(trig_rad[i]);
+      ui_str(CX + lround(RL * ci) - w / 2, CY - lround(RL * si) - 7, trig_rad[i], false, i == k ? C_TEXT : C_GRAY, C_BG);
+    }
+
+    char t[40], v[24];
+    sprintf(t, "%d" DEG, trig_deg[k]);
+    ui_str(206, 32, t, true, C_TEXT, C_BG);
+    sprintf(t, "%s rad", trig_rad[k]);
+    ui_str(206, 54, t, true, C_TEXT, C_BG);
+    sprintf(t, "cos = %s", exact(c));
+    ui_str(206, 90, t, true, blue, C_BG);
+    fmt_num(v, c);
+    sprintf(t, "\xe2\x89\x88 %s", v);
+    ui_str(206, 110, t, false, C_GRAY, C_BG);
+    sprintf(t, "sin = %s", exact(s));
+    ui_str(206, 138, t, true, C_BAD, C_BG);
+    fmt_num(v, s);
+    sprintf(t, "\xe2\x89\x88 %s", v);
+    ui_str(206, 158, t, false, C_GRAY, C_BG);
+    ui_str(206, 200, "Flèches :", false, C_GRAY, C_BG);
+    ui_str(206, 214, "changer l'angle", false, C_GRAY, C_BG);
+
+    eadk_event_t e = ui_event(-1);
+    if (e == eadk_event_back) return;
+    if (e == eadk_event_right || e == eadk_event_up) k = (k + 1) % 16;
+    else if (e == eadk_event_left || e == eadk_event_down) k = (k + 15) % 16;
+    else if (e == eadk_event_ok || e == eadk_event_exe) { trigo_table(); ui_text("Valeurs remarquables", ""); }
+  }
+}
+
 void maths_app(void) {
-  static const char *const menu[] = {"Second degré", "Suite arithmétique", "Suite géométrique"};
+  static const char *const menu[] = {"Second degré", "Suite arithmétique", "Suite géométrique", "Cercle trigonométrique"};
   static const char *const l_sd[] = {"a", "b", "c"};
   static const char *const l_su[] = {"u0", "Raison", "n"};
   static char sd[3][FIELDLEN] = {"2", "-4", "-6"};
   static char su[2][3][FIELDLEN] = {{"3", "2", "10"}, {"2", "3", "5"}};
   for (;;) {
-    int k = ui_menu("Maths", menu, 3);
+    int k = ui_menu("Maths", menu, 4);
     if (k < 0) return;
     if (k == 0)
       while (ui_form("ax^2 + bx + c", l_sd, sd, 3)) { second_degre_explain(sd[0], sd[1], sd[2]); ui_text("Second degré", ""); }
+    else if (k == 3)
+      trigo_app();
     else
       while (ui_form(menu[k], l_su, su[k - 1], 3)) { suite_explain(k == 2, su[k - 1][0], su[k - 1][1], su[k - 1][2]); ui_text(menu[k], ""); }
   }

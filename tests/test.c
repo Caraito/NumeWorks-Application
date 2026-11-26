@@ -164,6 +164,11 @@ int main(void) {
   second_degre_explain("0", "1", "1");
   expect("a nul", "a = 0");
 
+  trigo_table();
+  expect("trigo 30", "30\xc2\xb0     \xcf\x80/6      \xe2\x88\x9a" "3/2     1/2");
+  expect("trigo 150", "150\xc2\xb0    5\xcf\x80/6     -\xe2\x88\x9a" "3/2    1/2");
+  expect("trigo 270", "270\xc2\xb0    3\xcf\x80/2     0        -1");
+  expect("trigo 315", "315\xc2\xb0    7\xcf\x80/4     \xe2\x88\x9a" "2/2     -\xe2\x88\x9a" "2/2");
   suite_explain(false, "3", "2", "10");
   expect("arith un", "u(10) = 3 + 10 \xc3\x97 2 = 23");
   expect("arith somme", "= 143");

@@ -10,7 +10,7 @@ Le menu principal a quatre parties :
 
 | Partie | Contenu |
 |---|---|
-| **Maths** | **Second degré** avec étapes (Δ, racines exactes comme `(-1 - √17)/4`, formes factorisée et canonique, sommet, signe) ; **suites** arithmétiques et géométriques (terme général, somme, variation). |
+| **Maths** | **Second degré** avec étapes (Δ, racines exactes comme `(-1 - √17)/4`, formes factorisée et canonique, sommet, signe) ; **suites** arithmétiques et géométriques (terme général, somme, variation) ; **cercle trigonométrique** (angles remarquables en degrés et radians, cos et sin exacts) et tableau des valeurs remarquables. |
 | **Physique-chimie** | **Chimie** : équilibrage d'équations (parenthèses, crochets, hydrates, ions, électrons), **oxydoréduction** (couple trouvé automatiquement, demi-équations, équation bilan), **tableau d'avancement** (réactif limitant, x max, état final), **masse molaire** d'une formule, **quantité de matière** (n = m/M, C = n/V, Cm = m/V, dilution). **Physique** : **formules à trous**, on remplit toutes les cases sauf une et l'inconnue est calculée (mécanique, électricité, ondes et lumière, matière et fluides : 20 formules). |
 | **NSI** | Conversions de bases avec étapes, addition / soustraction posées avec retenues, complément à 2, nombres à virgule IEEE 754, entraînement noté. |
 | **Utilitaires** | **Chronomètre** avec tours, **minuteur** avec alerte visuelle, **nombres aléatoires** (intervalle, sans doublon, dés, pile ou face, mélange), **batterie** (pourcentage estimé, état de charge, temps restant mesuré). |
@@ -95,6 +95,8 @@ Très improbable avec une simple application, mais au cas où :
 
 **Suites** : entrer u0, la raison (r ou q) et n. L'outil donne u(n), la somme u0 + … + u(n), le sens de variation et les premiers termes.
 
+**Cercle trigonométrique** : les 16 angles remarquables sur le cercle. Les flèches changent l'angle : degrés, radians, cos et sin exacts (`√3/2`, `1/2`…) et décimaux, avec les projections sur les axes. **OK** affiche le tableau complet (degrés, radians, cos, sin) et les formules des angles associés.
+
 ### Physique-chimie
 
 #### Chimie
@@ -167,7 +169,7 @@ Code en C, environ 2 100 lignes, dans `src/` :
 | `ui.c` / `ui.h` | Menus, formulaires, texte défilant, gros chiffres |
 | `chimie.c` | Menu Physique-chimie, lecture des formules, équilibrage (élimination de Gauss en entiers), avancement, masse molaire, quantité de matière |
 | `physique.c` | Formules à trous (aussi utilisées par « Quantité de matière ») |
-| `maths.c` | Second degré, suites |
+| `maths.c` | Second degré, suites, cercle trigonométrique |
 | `binaire.c` | NSI : conversions, opérations posées, complément à 2, IEEE 754, quiz |
 | `outils.c` | Utilitaires : chronomètre, minuteur, aléatoire, batterie |
 | `main.c` | Menu principal |
