@@ -100,7 +100,12 @@ void ui_str(int x, int y, const char *s, bool large, eadk_color_t fg, eadk_color
   eadk_display_draw_string(nfd(s), (eadk_point_t){x, y}, large, fg, bg);
 }
 
-void ui_clear(void) { eadk_display_push_rect_uniform(eadk_screen_rect, C_BG); }
+/* Ne repeint pas le bandeau (ui_header le fait juste après) : repeindre en blanc puis en jaune
+ * fait apparaître des traits blancs pendant le rafraîchissement de l'écran. */
+void ui_clear(void) {
+  eadk_display_wait_for_vblank();
+  eadk_display_push_rect_uniform((eadk_rect_t){0, 22, 320, 218}, C_BG);
+}
 
 /* Après une extinction (shift + ON/OFF), l'écran est réinitialisé et son contenu perdu :
  * il affiche du bruit. On relit un pixel du bandeau ; s'il a changé, tout est à redessiner.
@@ -189,8 +194,10 @@ int ui_menu(const char *title, const char *const items[], int n) {
   int sel = sels[slot] < n ? sels[slot] : 0;
   for (;;) {
     if (g_quit) return -1;
-    ui_clear();
+    eadk_display_wait_for_vblank();
     ui_header(title, "");
+    eadk_display_push_rect_uniform((eadk_rect_t){0, 22, 320, 6}, C_BG);
+    eadk_display_push_rect_uniform((eadk_rect_t){0, 28 + n * 26, 320, 212 - n * 26}, C_BG);
     for (int i = 0; i < n; i++) {
       int y = 28 + i * 26;
       eadk_color_t bg = i == sel ? C_SEL : C_BG;
@@ -218,8 +225,10 @@ static int utf8_len(const char *s) {
   return n;
 }
 
+static bool cont(char c) { return (c & 0xC0) == 0x80; } /* octet de suite UTF-8 */
+
 bool ui_form(const char *title, const char *const labels[], char bufs[][FIELDLEN], int n) {
-  int sel = 0;
+  int sel = 0, c = strlen(bufs[0]); /* c : position du curseur (octets) */
   for (;;) {
     if (g_quit) return false;
     ui_clear();
@@ -232,28 +241,40 @@ bool ui_form(const char *title, const char *const labels[], char bufs[][FIELDLEN
       eadk_display_push_rect_uniform((eadk_rect_t){118, y, 196, 26}, border);
       eadk_display_push_rect_uniform((eadk_rect_t){118 + bw, y + bw, 196 - 2 * bw, 26 - 2 * bw}, C_BG);
       const char *v = bufs[i];
-      int len = utf8_len(v);
-      while (len > 18) { v++; while ((*v & 0xC0) == 0x80) v++; len--; } /* affiche la fin */
-      ui_str(123, y + 4, v, true, C_TEXT, C_BG);
-      if (i == sel) eadk_display_push_rect_uniform((eadk_rect_t){123 + 10 * len, y + 4, 2, 18}, C_HEAD);
+      int cc = 0; /* curseur en caractères */
+      for (int j = 0; i == sel && j < c; j++) cc += !cont(v[j]);
+      int skip = i == sel && cc > 18 ? cc - 18 : i != sel && utf8_len(v) > 18 ? utf8_len(v) - 18 : 0;
+      for (; skip > 0; skip--, cc--) { v++; while (cont(*v)) v++; }
+      char vis[FIELDLEN];
+      int j = 0;
+      for (int k = 0; v[j] && (k < 18 || cont(v[j])); j++) k += !cont(v[j]);
+      memcpy(vis, v, j);
+      vis[j] = 0;
+      ui_str(123, y + 4, vis, true, C_TEXT, C_BG);
+      if (i == sel) eadk_display_push_rect_uniform((eadk_rect_t){123 + 10 * cc, y + 4, 2, 18}, C_HEAD);
     }
-    ui_str(8, 224, "haut/bas : changer de champ", false, C_GRAY, C_BG);
+    ui_str(8, 224, "haut/bas : champ   gauche/droite : curseur", false, C_GRAY, C_BG);
     eadk_event_t e = ui_event(-1);
     char *b = bufs[sel];
     int l = strlen(b);
     if (e == eadk_event_back) return false;
     else if (e == eadk_event_exe) return true;
-    else if (e == eadk_event_ok) { if (sel == n - 1) return true; sel++; }
-    else if (e == eadk_event_up) sel = (sel + n - 1) % n;
-    else if (e == eadk_event_down) sel = (sel + 1) % n;
+    else if (e == eadk_event_ok) { if (sel == n - 1) return true; sel++; c = strlen(bufs[sel]); }
+    else if (e == eadk_event_up) { sel = (sel + n - 1) % n; c = strlen(bufs[sel]); }
+    else if (e == eadk_event_down) { sel = (sel + 1) % n; c = strlen(bufs[sel]); }
+    else if (e == eadk_event_left) { if (c > 0) c--; while (c > 0 && cont(b[c])) c--; }
+    else if (e == eadk_event_right) { if (c < l) c++; while (c < l && cont(b[c])) c++; }
     else if (e == eadk_event_backspace) {
-      while (l > 0 && (b[l - 1] & 0xC0) == 0x80) l--;
-      if (l > 0) l--;
-      b[l] = 0;
-    } else if (e == eadk_event_clear) b[0] = 0;
+      int p = c;
+      if (p > 0) p--;
+      while (p > 0 && cont(b[p])) p--;
+      memmove(b + p, b + c, l - c + 1);
+      c = p;
+    } else if (e == eadk_event_clear) { b[0] = 0; c = 0; }
     else {
       const char *t = ev_text(e);
-      if (t && l + strlen(t) < FIELDLEN) strcat(b, t);
+      int tl = t ? strlen(t) : 0;
+      if (t && l + tl < FIELDLEN) { memmove(b + c + tl, b + c, l - c + 1); memcpy(b + c, t, tl); c += tl; }
     }
   }
 }

@@ -10,7 +10,10 @@ void eadk_display_push_rect_uniform(eadk_rect_t r, eadk_color_t c) {}
 void eadk_display_draw_string(const char *t, eadk_point_t p, bool l, eadk_color_t a, eadk_color_t b) {}
 static eadk_color_t pixel; /* le pixel relu par ui_event pour détecter un écran perdu */
 void eadk_display_pull_rect(eadk_rect_t r, eadk_color_t *p) { *p = pixel; }
-eadk_event_t eadk_event_get(int32_t *t) { return eadk_event_back; }
+static const eadk_event_t *keys; /* touches simulées pour ui_form, puis « retour » */
+static int nkeys;
+eadk_event_t eadk_event_get(int32_t *t) { return nkeys > 0 ? (nkeys--, *keys++) : eadk_event_back; }
+bool eadk_display_wait_for_vblank(void) { return true; }
 uint32_t eadk_random(void) { return rand(); }
 void eadk_backlight_set_brightness(uint8_t b) {}
 uint8_t eadk_backlight_brightness(void) { return 100; }
@@ -144,6 +147,14 @@ int main(void) {
     expect("travail angle", "Résultat : \xce\xb1 = 60");
   }
 
+  { /* curseur : gauche, gauche, effacer, π, droite, 1 */
+    static const eadk_event_t k[] = {eadk_event_left, eadk_event_left, eadk_event_backspace, eadk_event_pi,
+                                     eadk_event_right, eadk_event_one, eadk_event_exe};
+    static const char *const lab[] = {"x"};
+    char b[1][FIELDLEN] = {"13" "\xcf\x80" "/6"};
+    keys = k; nkeys = 7;
+    if (!ui_form("t", lab, b, 1) || strcmp(b[0], "13" "\xcf\x80" "/16")) { fails++; printf("ÉCHEC curseur : %s\n", b[0]); }
+  }
   second_degre_explain("2", "-4", "-6");
   expect("delta", "\xce\x94 = b^2 - 4ac = (-4)^2 - 4 \xc3\x97 2 \xc3\x97 (-6) = 64");
   expect("x1", "x1 = -1");
