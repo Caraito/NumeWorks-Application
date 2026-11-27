@@ -1,8 +1,14 @@
-# Pousser un tag « v1.2 » crée la release GitHub avec release/outils.nwa en pièce jointe.
+# Crée la release GitHub avec release/outils.nwa en pièce jointe :
+# pousser un tag « v1.2 », ou Actions -> Release -> Run workflow (crée le tag).
 name: Release
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Numéro de version (ex. v1.2)"
+        required: true
 permissions:
   contents: write
 jobs:
@@ -10,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: gh release create "$GITHUB_REF_NAME" release/outils.nwa --title "Version ${GITHUB_REF_NAME#v}" --notes-file release/NOTES.md
+      - run: gh release create "$TAG" release/outils.nwa --target "$GITHUB_SHA" --title "Version ${TAG#v}" --notes-file release/NOTES.md
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.version || github.ref_name }}

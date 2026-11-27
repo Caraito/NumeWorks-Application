@@ -191,7 +191,7 @@ make sim    # -> output/outils.nwb, pour le simulateur officiel :
             #    epsilon.bin --nwb output/outils.nwb
 ```
 
-**Publier une version** : copier `output/outils.nwa` dans `release/`, écrire les nouveautés dans `release/NOTES.md`, committer, puis `git tag v1.2 && git push origin v1.2`. L'action GitHub crée la release avec le `.nwa` en pièce jointe.
+**Publier une version** : copier `output/outils.nwa` dans `release/`, écrire les nouveautés dans `release/NOTES.md`, committer, puis pousser un tag `v1.2` (ou onglet **Actions → Release → Run workflow** avec le numéro de version). L'action GitHub crée la release avec le `.nwa` en pièce jointe.
 
 Le simulateur se compile depuis [le code source d'Epsilon](https://github.com/numworks/epsilon) (`make PLATFORM=linux epsilon.bin`).
 
