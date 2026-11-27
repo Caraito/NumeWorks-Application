@@ -193,6 +193,16 @@ int main(void) {
   expect("mesure positive 2", "positive : 3\xcf\x80/2");
   mesures_explain("0\xcf\x80");
   expect("mesure nulle", "négative : -2\xcf\x80");
+  deg_rad_explain("150");
+  expect("deg->rad", "= 5\xcf\x80/6 rad");
+  deg_rad_explain("5\xcf\x80/6");
+  expect("rad->deg", "= 150\xc2\xb0");
+  deg_rad_explain("\xcf\x80/7");
+  expect("rad->deg fraction", "= 180/7\xc2\xb0");
+  deg_rad_explain("22,5");
+  expect("deg décimal", "0.3927 rad");
+  deg_rad_explain("abc");
+  expect("deg erreur", "Radians : avec");
   suite_explain(false, "3", "2", "10");
   expect("arith un", "u(10) = 3 + 10 \xc3\x97 2 = 23");
   expect("arith somme", "= 143");

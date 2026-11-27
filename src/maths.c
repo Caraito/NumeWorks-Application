@@ -457,27 +457,74 @@ static void trigo_app(void) {
   }
 }
 
-void maths_app(void) {
-  static const char *const menu[] = {"Second degré", "Suite arithmétique", "Suite géométrique", "Cercle trigonométrique", "Même point image", "Mesure principale"};
-  static const char *const l_sd[] = {"a", "b", "c"};
-  static const char *const l_su[] = {"u0", "Raison", "n"};
-  static char sd[3][FIELDLEN] = {"2", "-4", "-6"};
-  static char su[2][3][FIELDLEN] = {{"3", "2", "10"}, {"2", "3", "5"}};
+/* Avec π : radians -> degrés. Sans π : degrés -> radians. */
+void deg_rad_explain(const char *sa) {
+  out_clear();
+  long p, q;
+  double v;
+  char t[24], w[24];
+  if (parse_pi(sa, &p, &q)) {
+    pi_str(t, p, q);
+    frac(w, 180 * p, q);
+    outf("%s rad = %s " TIMES " 180" DEG " / " PI, t, t);
+    outf("  = %s" DEG, w);
+    if ((180 * p) % q) { fmt_num(w, 180.0 * p / q); outf("  " "\xe2\x89\x88" " %s" DEG, w); }
+  } else if (parse_long(sa, &p) && labs(p) <= 100000) {
+    pi_str(t, p, 180);
+    outf("%ld" DEG " = %ld " TIMES " " PI " / 180", p, p);
+    outf("  = %s rad", t);
+    fmt_num(w, p * M_PI / 180);
+    outf("  " "\xe2\x89\x88" " %s rad", w);
+  } else if (parse_double(sa, &v)) {
+    fmt_num(t, v);
+    fmt_num(w, v * M_PI / 180);
+    outf("%s" DEG " = %s " TIMES " " PI " / 180", t, t);
+    outf("  " "\xe2\x89\x88" " %s rad", w);
+  } else {
+    outf("Degrés : un nombre (150, -45, 22,5).");
+    outf("Radians : avec " PI " (5" PI "/6, -" PI "/4).");
+    return;
+  }
+  outf("");
+  outf("Degrés \xe2\x86\x92 radians : " TIMES " " PI " / 180");
+  outf("Radians \xe2\x86\x92 degrés : " TIMES " 180 / " PI);
+  outf(PI " rad = 180" DEG);
+}
+
+static void trigo_menu(void) {
+  static const char *const menu[] = {"Cercle trigonométrique", "Degrés et radians", "Même point image", "Mesure principale"};
+  static const char *const l_dr[] = {"Angle (" DEG " ou " PI ")"};
+  static char dr[1][FIELDLEN] = {"150"};
   static const char *const l_mp[] = {"Angle a", "Angle b"};
   static char mp[2][FIELDLEN] = {"13" PI "/6", PI "/6"};
   static const char *const l_me[] = {"Angle"};
   static char me[1][FIELDLEN] = {"37" PI "/6"};
   for (;;) {
-    int k = ui_menu("Maths", menu, 6);
+    int k = ui_menu("Trigonométrie", menu, 4);
+    if (k < 0) return;
+    if (k == 0) trigo_app();
+    else if (k == 1)
+      while (ui_form(menu[1], l_dr, dr, 1)) { deg_rad_explain(dr[0]); ui_text(menu[1], ""); }
+    else if (k == 2)
+      while (ui_form(menu[2], l_mp, mp, 2)) { meme_point_explain(mp[0], mp[1]); ui_text(menu[2], ""); }
+    else
+      while (ui_form(menu[3], l_me, me, 1)) { mesures_explain(me[0]); ui_text(menu[3], ""); }
+  }
+}
+
+void maths_app(void) {
+  static const char *const menu[] = {"Second degré", "Suite arithmétique", "Suite géométrique", "Trigonométrie"};
+  static const char *const l_sd[] = {"a", "b", "c"};
+  static const char *const l_su[] = {"u0", "Raison", "n"};
+  static char sd[3][FIELDLEN] = {"2", "-4", "-6"};
+  static char su[2][3][FIELDLEN] = {{"3", "2", "10"}, {"2", "3", "5"}};
+  for (;;) {
+    int k = ui_menu("Maths", menu, 4);
     if (k < 0) return;
     if (k == 0)
       while (ui_form("ax^2 + bx + c", l_sd, sd, 3)) { second_degre_explain(sd[0], sd[1], sd[2]); ui_text("Second degré", ""); }
     else if (k == 3)
-      trigo_app();
-    else if (k == 4)
-      while (ui_form(menu[4], l_mp, mp, 2)) { meme_point_explain(mp[0], mp[1]); ui_text(menu[4], ""); }
-    else if (k == 5)
-      while (ui_form(menu[5], l_me, me, 1)) { mesures_explain(me[0]); ui_text(menu[5], ""); }
+      trigo_menu();
     else
       while (ui_form(menu[k], l_su, su[k - 1], 3)) { suite_explain(k == 2, su[k - 1][0], su[k - 1][1], su[k - 1][2]); ui_text(menu[k], ""); }
   }

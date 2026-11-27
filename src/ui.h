@@ -71,6 +71,7 @@ void suite_explain(bool geo, const char *u0, const char *raison, const char *n);
 void trigo_table(void);
 void meme_point_explain(const char *sa, const char *sb);
 void mesures_explain(const char *sa);
+void deg_rad_explain(const char *sa);
 int pct_from_voltage(float v);
 void bin_convert_explain(const char *s, int base);
 void bin_op_explain(const char *a, const char *b, bool sub);
