@@ -182,6 +182,17 @@ int main(void) {
   expect("principale pi", "a : \xcf\x80     b : \xcf\x80");
   meme_point_explain("13/6", "\xcf\x80");
   expect("sans pi", "touche \xcf\x80");
+  mesures_explain("37\xcf\x80/6");
+  expect("mesure étape", "37\xcf\x80/6 = \xcf\x80/6 + 2\xcf\x80 \xc3\x97 3");
+  expect("mesure positive", "positive : \xcf\x80/6");
+  expect("mesure négative", "négative : -11\xcf\x80/6");
+  expect("mesure k=-1", "k = -1 : -11\xcf\x80/6");
+  mesures_explain("-7\xcf\x80/4");
+  expect("mesure principale neg", "-> \xcf\x80/4");
+  mesures_explain("-\xcf\x80/2");
+  expect("mesure positive 2", "positive : 3\xcf\x80/2");
+  mesures_explain("0\xcf\x80");
+  expect("mesure nulle", "négative : -2\xcf\x80");
   suite_explain(false, "3", "2", "10");
   expect("arith un", "u(10) = 3 + 10 \xc3\x97 2 = 23");
   expect("arith somme", "= 143");

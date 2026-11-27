@@ -327,11 +327,45 @@ static void pi_str(char *d, long p, long q) { /* « 13π/6 », « -π », « 0 �
   if (q != 1) sprintf(d + strlen(d), "/%ld", q);
 }
 
-static void principale(char *d, long p, long q) { /* mesure dans ]-π ; π] */
+static long princ(long p, long q) { /* numérateur de la mesure dans ]-π ; π] */
   long r = p % (2 * q);
   if (r > q) r -= 2 * q;
   if (r <= -q) r += 2 * q;
-  pi_str(d, r, q);
+  return r;
+}
+
+static void principale(char *d, long p, long q) { pi_str(d, princ(p, q), q); }
+
+void mesures_explain(const char *sa) {
+  out_clear();
+  long p, q;
+  if (!parse_pi(sa, &p, &q)) {
+    outf("Écris l'angle avec " PI " (touche " PI ") :");
+    outf("  37" PI "/6, -" PI "/3, 2" PI ", 5/6" PI "...");
+    return;
+  }
+  long g = gcdl(p, q);
+  p /= g; q /= g;
+  long r = princ(p, q), k = (p - r) / (2 * q), pos = r < 0 ? r + 2 * q : r;
+  char a[24], m[24], t[24];
+  pi_str(a, p, q);
+  pi_str(m, r, q);
+  outf("a = %s", a);
+  outf("");
+  outf("Mesure principale (dans ]-" PI " ; " PI "]) :");
+  if (k) outf("  %s = %s + 2" PI " " TIMES " %s%ld%s", a, m, k < 0 ? "(" : "", k, k < 0 ? ")" : "");
+  outf("  -> %s", m);
+  outf("");
+  pi_str(t, pos, q);
+  outf("Plus petite mesure positive : %s", t);
+  pi_str(t, pos ? pos - 2 * q : -2 * q, q);
+  outf("Plus grande mesure négative : %s", t);
+  outf("");
+  outf("Autres mesures (même point, + 2k" PI ") :");
+  for (long i = -3; i <= 3; i++) {
+    pi_str(t, r + 2 * i * q, q);
+    outf("  k = %2ld : %s%s", i, t, i ? "" : "  (principale)");
+  }
 }
 
 void meme_point_explain(const char *sa, const char *sb) {
@@ -424,15 +458,17 @@ static void trigo_app(void) {
 }
 
 void maths_app(void) {
-  static const char *const menu[] = {"Second degré", "Suite arithmétique", "Suite géométrique", "Cercle trigonométrique", "Même point image"};
+  static const char *const menu[] = {"Second degré", "Suite arithmétique", "Suite géométrique", "Cercle trigonométrique", "Même point image", "Mesure principale"};
   static const char *const l_sd[] = {"a", "b", "c"};
   static const char *const l_su[] = {"u0", "Raison", "n"};
   static char sd[3][FIELDLEN] = {"2", "-4", "-6"};
   static char su[2][3][FIELDLEN] = {{"3", "2", "10"}, {"2", "3", "5"}};
   static const char *const l_mp[] = {"Angle a", "Angle b"};
   static char mp[2][FIELDLEN] = {"13" PI "/6", PI "/6"};
+  static const char *const l_me[] = {"Angle"};
+  static char me[1][FIELDLEN] = {"37" PI "/6"};
   for (;;) {
-    int k = ui_menu("Maths", menu, 5);
+    int k = ui_menu("Maths", menu, 6);
     if (k < 0) return;
     if (k == 0)
       while (ui_form("ax^2 + bx + c", l_sd, sd, 3)) { second_degre_explain(sd[0], sd[1], sd[2]); ui_text("Second degré", ""); }
@@ -440,6 +476,8 @@ void maths_app(void) {
       trigo_app();
     else if (k == 4)
       while (ui_form(menu[4], l_mp, mp, 2)) { meme_point_explain(mp[0], mp[1]); ui_text(menu[4], ""); }
+    else if (k == 5)
+      while (ui_form(menu[5], l_me, me, 1)) { mesures_explain(me[0]); ui_text(menu[5], ""); }
     else
       while (ui_form(menu[k], l_su, su[k - 1], 3)) { suite_explain(k == 2, su[k - 1][0], su[k - 1][1], su[k - 1][2]); ui_text(menu[k], ""); }
   }

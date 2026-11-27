@@ -10,7 +10,7 @@ Le menu principal a quatre parties :
 
 | Partie | Contenu |
 |---|---|
-| **Maths** | **Second degré** avec étapes (Δ, racines exactes comme `(-1 - √17)/4`, formes factorisée et canonique, sommet, signe) ; **suites** arithmétiques et géométriques (terme général, somme, variation) ; **cercle trigonométrique** (angles remarquables en degrés et radians, cos et sin exacts) et tableau des valeurs remarquables ; **même point image** (a = b + 2kπ ?). |
+| **Maths** | **Second degré** avec étapes (Δ, racines exactes comme `(-1 - √17)/4`, formes factorisée et canonique, sommet, signe) ; **suites** arithmétiques et géométriques (terme général, somme, variation) ; **cercle trigonométrique** (angles remarquables en degrés et radians, cos et sin exacts) et tableau des valeurs remarquables ; **même point image** (a = b + 2kπ ?) ; **mesure principale** et autres mesures d'un angle. |
 | **Physique-chimie** | **Chimie** : équilibrage d'équations (parenthèses, crochets, hydrates, ions, électrons), **oxydoréduction** (couple trouvé automatiquement, demi-équations, équation bilan), **tableau d'avancement** (réactif limitant, x max, état final), **masse molaire** d'une formule, **quantité de matière** (n = m/M, C = n/V, Cm = m/V, dilution). **Physique** : **formules à trous**, on remplit toutes les cases sauf une et l'inconnue est calculée (mécanique, électricité, ondes et lumière, matière et fluides : 20 formules). |
 | **NSI** | Conversions de bases avec étapes, addition / soustraction posées avec retenues, complément à 2, nombres à virgule IEEE 754, entraînement noté. |
 | **Utilitaires** | **Chronomètre** avec tours, **minuteur** avec alerte visuelle, **nombres aléatoires** (intervalle, sans doublon, dés, pile ou face, mélange), **batterie** (pourcentage estimé, état de charge, temps restant mesuré). |
@@ -99,6 +99,8 @@ Très improbable avec une simple application, mais au cas où :
 
 **Même point image** : deux angles écrits avec π (touche **π** ou `pi`), par exemple `13π/6` et `π/6`. L'outil calcule k = (a − b) / 2π, dit si k est entier (même point sur le cercle) et donne la mesure principale de chaque angle dans ]−π ; π].
 
+**Mesure principale** : un angle (ex. `37π/6`) → sa mesure principale avec le calcul (`37π/6 = π/6 + 2π × 3`), la plus petite mesure positive, la plus grande mesure négative et d'autres mesures du même point (k de −3 à 3).
+
 ### Physique-chimie
 
 #### Chimie
@@ -171,7 +173,7 @@ Code en C, environ 2 100 lignes, dans `src/` :
 | `ui.c` / `ui.h` | Menus, formulaires, texte défilant, gros chiffres |
 | `chimie.c` | Menu Physique-chimie, lecture des formules, équilibrage (élimination de Gauss en entiers), avancement, masse molaire, quantité de matière |
 | `physique.c` | Formules à trous (aussi utilisées par « Quantité de matière ») |
-| `maths.c` | Second degré, suites, cercle trigonométrique, même point image |
+| `maths.c` | Second degré, suites, cercle trigonométrique, même point image, mesure principale |
 | `binaire.c` | NSI : conversions, opérations posées, complément à 2, IEEE 754, quiz |
 | `outils.c` | Utilitaires : chronomètre, minuteur, aléatoire, batterie |
 | `main.c` | Menu principal |
