@@ -32,7 +32,7 @@ Les **applications externes** (fichiers `.nwa`), elles, sont prévues par NumWor
 
 ## Installer l'application
 
-1. Télécharger le fichier [`release/outils.nwa`](release/outils.nwa) (bouton « Download raw file » sur GitHub).
+1. Télécharger `outils.nwa` dans la [dernière release](https://github.com/Caraito/NumeWorks-Application/releases/latest) (section « Assets »), ou directement [`release/outils.nwa`](release/outils.nwa).
 2. Sur un ordinateur, ouvrir **https://my.numworks.com/apps** avec **Chrome ou Edge** (Firefox et Safari ne savent pas parler à la calculatrice en USB).
 3. Brancher la calculatrice en USB, l'allumer : l'écran « CALCULATRICE CONNECTÉE » s'affiche.
 4. Suivre le site : choisir le fichier `outils.nwa`, puis installer.
@@ -190,6 +190,8 @@ make test   # vérifie les calculs (chimie, physique, maths, binaire, batterie) 
 make sim    # -> output/outils.nwb, pour le simulateur officiel :
             #    epsilon.bin --nwb output/outils.nwb
 ```
+
+**Publier une version** : copier `output/outils.nwa` dans `release/`, écrire les nouveautés dans `release/NOTES.md`, committer, puis `git tag v1.2 && git push origin v1.2`. L'action GitHub crée la release avec le `.nwa` en pièce jointe.
 
 Le simulateur se compile depuis [le code source d'Epsilon](https://github.com/numworks/epsilon) (`make PLATFORM=linux epsilon.bin`).
 

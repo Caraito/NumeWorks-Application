@@ -1,0 +1,15 @@
+# Pousser un tag « v1.2 » crée la release GitHub avec release/outils.nwa en pièce jointe.
+name: Release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: gh release create "$GITHUB_REF_NAME" release/outils.nwa --title "Version ${GITHUB_REF_NAME#v}" --notes-file release/NOTES.md
+        env:
+          GH_TOKEN: ${{ github.token }}
