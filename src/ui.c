@@ -173,6 +173,7 @@ static const char *ev_text(eadk_event_t e) {
     case eadk_event_greater: return ">";
     case eadk_event_lower: return "<";
     case eadk_event_underscore: return "_";
+    case eadk_event_pi: return "\xcf\x80"; /* π */
     default: return NULL;
   }
 }
@@ -252,7 +253,7 @@ bool ui_form(const char *title, const char *const labels[], char bufs[][FIELDLEN
     } else if (e == eadk_event_clear) b[0] = 0;
     else {
       const char *t = ev_text(e);
-      if (t && l + 1 < FIELDLEN) { b[l] = *t; b[l + 1] = 0; }
+      if (t && l + strlen(t) < FIELDLEN) strcat(b, t);
     }
   }
 }

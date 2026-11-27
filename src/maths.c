@@ -297,6 +297,76 @@ void trigo_table(void) {
   outf("  cos(" PI "/2 - x) = sin x   sin(" PI "/2 - x) = cos x");
 }
 
+/* Angle « p π / q » : 13π/6, -π/3, 2π, 5/6π, ou « pi » au lieu de π. */
+static bool parse_pi(const char *s, long *p, long *q) {
+  char d[FIELDLEN];
+  int j = 0;
+  bool pi = false;
+  for (; *s && j < FIELDLEN - 1; s++) {
+    if (!strncmp(s, PI, 2) || !strncmp(s, "pi", 2)) { pi = true; s++; }
+    else if (*s != ' ') d[j++] = *s;
+  }
+  d[j] = 0;
+  char *sl = strchr(d, '/');
+  *q = 1;
+  if (sl) { *sl = 0; if (!parse_long(sl + 1, q) || *q == 0) return false; }
+  if (!d[0] || !strcmp(d, "+")) *p = 1;
+  else if (!strcmp(d, "-")) *p = -1;
+  else if (!parse_long(d, p)) return false;
+  if (*q < 0) { *p = -*p; *q = -*q; }
+  return pi && labs(*p) <= 10000 && *q <= 10000; /* ponytail: bornes pour rester dans un long 32 bits */
+}
+
+static void pi_str(char *d, long p, long q) { /* « 13π/6 », « -π », « 0 » */
+  long g = gcdl(p, q);
+  if (g) { p /= g; q /= g; }
+  if (!p) { strcpy(d, "0"); return; }
+  if (p == 1) strcpy(d, PI);
+  else if (p == -1) strcpy(d, "-" PI);
+  else sprintf(d, "%ld" PI, p);
+  if (q != 1) sprintf(d + strlen(d), "/%ld", q);
+}
+
+static void principale(char *d, long p, long q) { /* mesure dans ]-π ; π] */
+  long r = p % (2 * q);
+  if (r > q) r -= 2 * q;
+  if (r <= -q) r += 2 * q;
+  pi_str(d, r, q);
+}
+
+void meme_point_explain(const char *sa, const char *sb) {
+  out_clear();
+  long p1, q1, p2, q2;
+  if (!parse_pi(sa, &p1, &q1) || !parse_pi(sb, &p2, &q2)) {
+    outf("Écris les angles avec " PI " (touche " PI ") :");
+    outf("  13" PI "/6, -" PI "/3, 2" PI ", 5/6" PI "...");
+    return;
+  }
+  char a[24], b[24], df[24], k[24];
+  pi_str(a, p1, q1);
+  pi_str(b, p2, q2);
+  long num = p1 * q2 - p2 * q1, den = q1 * q2; /* a - b = num/den × π */
+  pi_str(df, num, den);
+  frac(k, num, 2 * den);
+  outf("a = %s et b = %s", a, b);
+  outf("");
+  outf("Même point image si a = b + 2k" PI ", k entier.");
+  outf("a - b = %s", df);
+  outf("k = (a - b) / 2" PI " = %s", k);
+  outf("");
+  if (num % (2 * den) == 0) {
+    outf("k est entier : MÊME point image.");
+    outf("%s = %s + 2" PI " " TIMES " %s%s%s", a, b, num < 0 ? "(" : "", k, num < 0 ? ")" : "");
+  } else {
+    outf("k n'est pas entier : points DIFFÉRENTS.");
+  }
+  outf("");
+  principale(a, p1, q1);
+  principale(b, p2, q2);
+  outf("Mesures principales (dans ]-" PI " ; " PI "]) :");
+  outf("  a : %s     b : %s", a, b);
+}
+
 static void dot(int x, int y, int s, eadk_color_t c) {
   eadk_display_push_rect_uniform((eadk_rect_t){x - s / 2, y - s / 2, s, s}, c);
 }
@@ -354,18 +424,22 @@ static void trigo_app(void) {
 }
 
 void maths_app(void) {
-  static const char *const menu[] = {"Second degré", "Suite arithmétique", "Suite géométrique", "Cercle trigonométrique"};
+  static const char *const menu[] = {"Second degré", "Suite arithmétique", "Suite géométrique", "Cercle trigonométrique", "Même point image"};
   static const char *const l_sd[] = {"a", "b", "c"};
   static const char *const l_su[] = {"u0", "Raison", "n"};
   static char sd[3][FIELDLEN] = {"2", "-4", "-6"};
   static char su[2][3][FIELDLEN] = {{"3", "2", "10"}, {"2", "3", "5"}};
+  static const char *const l_mp[] = {"Angle a", "Angle b"};
+  static char mp[2][FIELDLEN] = {"13" PI "/6", PI "/6"};
   for (;;) {
-    int k = ui_menu("Maths", menu, 4);
+    int k = ui_menu("Maths", menu, 5);
     if (k < 0) return;
     if (k == 0)
       while (ui_form("ax^2 + bx + c", l_sd, sd, 3)) { second_degre_explain(sd[0], sd[1], sd[2]); ui_text("Second degré", ""); }
     else if (k == 3)
       trigo_app();
+    else if (k == 4)
+      while (ui_form(menu[4], l_mp, mp, 2)) { meme_point_explain(mp[0], mp[1]); ui_text(menu[4], ""); }
     else
       while (ui_form(menu[k], l_su, su[k - 1], 3)) { suite_explain(k == 2, su[k - 1][0], su[k - 1][1], su[k - 1][2]); ui_text(menu[k], ""); }
   }

@@ -69,6 +69,7 @@ bool formule_explain(int idx, char f[5][FIELDLEN]);
 void second_degre_explain(const char *a, const char *b, const char *c);
 void suite_explain(bool geo, const char *u0, const char *raison, const char *n);
 void trigo_table(void);
+void meme_point_explain(const char *sa, const char *sb);
 int pct_from_voltage(float v);
 void bin_convert_explain(const char *s, int base);
 void bin_op_explain(const char *a, const char *b, bool sub);
